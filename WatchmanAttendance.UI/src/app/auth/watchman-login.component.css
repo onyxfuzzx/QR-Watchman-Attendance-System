@@ -1,0 +1,43 @@
+/* ================= PAGE ================= */
+
+.login-page {
+  @apply min-h-screen flex items-center justify-center bg-slate-50 px-4;
+}
+
+/* ================= CARD ================= */
+
+.login-card {
+  @apply w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-sm px-8 py-10;
+}
+
+/* ================= TITLE ================= */
+
+.login-title {
+  @apply text-2xl font-semibold text-gray-900 text-center;
+}
+
+.login-subtitle {
+  @apply text-sm text-gray-500 text-center mt-1 mb-8;
+}
+
+/* ================= FORM ================= */
+
+.login-form {
+  @apply flex flex-col gap-4;
+}
+
+.login-input {
+  @apply w-full h-11 px-4 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition;
+}
+
+/* ================= BUTTON ================= */
+
+.login-btn {
+  @apply mt-4 w-full bg-gray-900 hover:bg-gray-800 text-white h-11 rounded-lg text-sm font-medium transition;
+}
+
+/* ================= ERROR ================= */
+
+.login-error {
+  @apply mt-4 text-sm text-red-600 text-center;
+}

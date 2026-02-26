@@ -1,0 +1,319 @@
+<div class="dashboard">
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+      <h1>Admin Dashboard</h1>
+      <button (click)="logout()" class="btn-danger">
+        Logout
+      </button>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button (click)="setTab(ADMIN_TABS.watchmen)"
+              [class.active]="isTab(ADMIN_TABS.watchmen)">
+        Watchmen
+      </button>
+
+      <button (click)="setTab(ADMIN_TABS.attendance)"
+              [class.active]="isTab(ADMIN_TABS.attendance)">
+        Attendance
+      </button>
+
+      <button (click)="setTab(ADMIN_TABS.qr)"
+              [class.active]="isTab(ADMIN_TABS.qr)">
+        QR
+      </button>
+
+      <button (click)="setTab(ADMIN_TABS.audit)"
+              [class.active]="isTab(ADMIN_TABS.audit)">
+        Audit
+      </button>
+
+      <button (click)="setTab(ADMIN_TABS.requests)"
+              [class.active]="isTab(ADMIN_TABS.requests)">
+        Requests
+      </button>
+
+      <button (click)="setTab(ADMIN_TABS.shifts)"
+              [class.active]="isTab(ADMIN_TABS.shifts)">
+        Shift
+      </button>
+    </div>
+
+    <!-- ================= WATCHMEN ================= -->
+    <div *ngIf="isTab(ADMIN_TABS.watchmen)">
+
+      <section class="card">
+        <h2>Create Watchman</h2>
+
+        <div class="form-grid three">
+          <input class="input" [(ngModel)]="wm.fullName" placeholder="Full Name" />
+          <input class="input" [(ngModel)]="wm.username" placeholder="Username" />
+          <input class="input" [(ngModel)]="wm.password" type="password" placeholder="Password" />
+        </div>
+
+        <div class="actions">
+          <button (click)="createWatchman()" class="btn-primary">
+            Create Watchman
+          </button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Watchmen</h2>
+
+        <div class="grid-cards">
+          <div *ngFor="let w of watchmen" class="item-card">
+            <div>
+              <p class="title">{{ w.fullName }}</p>
+              <p class="meta">Username: {{ w.username }}</p>
+              <p class="status"
+                 [class.active]="w.isActive"
+                 [class.inactive]="!w.isActive">
+                {{ w.isActive ? 'Active' : 'Disabled' }}
+              </p>
+            </div>
+
+            <button *ngIf="w.isActive"
+                    (click)="disableWatchman(w.id)"
+                    class="btn-danger">
+              Disable
+            </button>
+
+            <button *ngIf="!w.isActive"
+                    (click)="enableWatchman(w.id)"
+                    class="btn-secondary">
+              Enable
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= ATTENDANCE ================= -->
+    <div *ngIf="isTab(ADMIN_TABS.attendance)">
+      <section class="card">
+        <h2>Attendance Logs</h2>
+
+        <div class="actions" *ngIf="selectedAttendance.size > 0">
+          <button class="btn-danger" (click)="bulkDelete()">
+            Delete Selected ({{ selectedAttendance.size }})
+          </button>
+        </div>
+
+        <div class="attendance-list">
+          <div *ngFor="let a of attendance" class="attendance-item">
+
+            <div class="attendance-left">
+              <input type="checkbox"
+                     (change)="toggleSelect(a.id)"
+                     [checked]="selectedAttendance.has(a.id)" />
+
+              <div class="attendance-info">
+                <strong>{{ a.fullName }}</strong>
+                <span>{{ a.createdAt | date:'medium' }}</span>
+
+                <a class="link"
+                   [routerLink]="['/map']"
+                   [queryParams]="{ lat: a.latitude, lng: a.longitude }"
+                   target="_blank">
+                  View Location
+                </a>
+              </div>
+            </div>
+
+            <div class="attendance-right">
+              <img *ngIf="a.photoPath"
+                   [src]="apiUrl + '/api/files/' + a.photoPath.split('/').pop()"
+                   class="attendance-photo" />
+
+              <button class="btn-danger"
+                      (click)="deleteAttendance(a.id)">
+                Delete
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= QR ================= -->
+    <div *ngIf="isTab(ADMIN_TABS.qr)">
+      <section class="card">
+        <h2>Create QR Location</h2>
+
+        <div class="form-grid two">
+          <input class="input" [(ngModel)]="qr.locationName" placeholder="Location Name" />
+          <input class="input" [(ngModel)]="qr.radius" placeholder="Radius (meters)" />
+          <input class="input" [(ngModel)]="qr.latitude" placeholder="Latitude" />
+          <input class="input" [(ngModel)]="qr.longitude" placeholder="Longitude" />
+        </div>
+
+        <div class="form-actions">
+          <button (click)="createQr()"
+                  [disabled]="qrLoading"
+                  class="btn-primary">
+            {{ qrLoading ? 'Creating...' : 'Create QR' }}
+          </button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>QR Locations</h2>
+
+        <div class="grid-cards">
+          <div *ngFor="let q of qrLocations" class="item-card qr-card">
+            <div class="qr-card">
+              <div class="qr-header">
+                <div>
+                  <p class="qr-title">{{ q.locationName }}</p>
+                  <p class="qr-coords">{{ q.latitude }}, {{ q.longitude }}</p>
+                </div>
+              </div>
+
+              <input class="qr-link"
+                     [value]="baseScanUrl + '/scan/' + q.qrToken"
+                     readonly />
+
+              <div class="qr-actions">
+                <button class="btn-secondary" (click)="toggleQr(q)">
+                  {{ showQrFor === q.id ? 'Hide QR' : 'Show QR' }}
+                </button>
+
+                <button class="btn-danger" (click)="disableQr(q.id)">
+                  Disable
+                </button>
+              </div>
+
+              <div class="qr-preview" *ngIf="showQrFor === q.id">
+                <img [src]="qrImageMap[q.id]" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= AUDIT ================= -->
+    <div *ngIf="isTab(ADMIN_TABS.audit)">
+      <section class="card">
+        <h2>Admin Audit Logs</h2>
+
+        <div class="audit-table">
+          <div class="audit-header">
+            <span>Admin</span>
+            <span>Action</span>
+            <span>Table</span>
+            <span>Time</span>
+          </div>
+
+          <div class="audit-row" *ngFor="let log of auditLogs">
+            <span class="admin">{{ log.adminName }}</span>
+            <span class="action">{{ log.action }}</span>
+            <span class="table">{{ log.tableName }}</span>
+            <span class="time">{{ log.performedAt | date:'medium' }}</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+
+    <div *ngIf="isTab(ADMIN_TABS.requests)">
+      <section class="card">
+        <h2>Pending Attendance Requests</h2>
+
+        <div *ngIf="loading">Loading...</div>
+
+        <div *ngIf="!loading && requests.length === 0" class="empty">
+          No pending requests
+        </div>
+
+        <table *ngIf="requests.length > 0" class="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Reason</th>
+              <th>Expected Time</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let r of requests">
+              <td>{{ r.attendanceDate | date }}</td>
+              <td>{{ r.type }}</td>
+              <td>{{ r.reason }}</td>
+              <td>{{ r.expectedTime || '-' }}</td>
+              <td>
+                <button class="btn-success" (click)="approve(r.id)">
+                  Approve
+                </button>
+                <button class="btn-danger" (click)="reject(r.id)">
+                  Reject
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+      </section>
+
+    </div>
+
+    <!-- ================= SHIFTS ================= -->
+    <div *ngIf="isTab(ADMIN_TABS.shifts)">
+      <section class="card">
+        <h2>Assign Shift</h2>
+
+        <select [(ngModel)]="shiftForm.watchmanId">
+          <option value="">Select Watchman</option>
+          <option *ngFor="let w of watchmen" [value]="w.id">
+            {{ w.fullName }}
+          </option>
+        </select>
+
+        <input type="time" [(ngModel)]="shiftForm.entryTime" />
+        <input type="time" [(ngModel)]="shiftForm.exitTime" />
+
+        <input type="number" [(ngModel)]="shiftForm.graceMinutes" placeholder="Grace Minutes" />
+        <input type="number" [(ngModel)]="shiftForm.halfDayAfterMinutes" placeholder="Half Day After Minutes" />
+
+        <button class="btn-primary" (click)="assignShift()">
+          Assign Shift
+        </button>
+
+
+        
+
+        </section>
+
+        <section class="card">
+          <h3>Assigned Shifts</h3>
+
+          <table class="table" *ngIf="shifts.length > 0">
+            <tr>
+              <th>Watchman</th>
+              <th>Entry</th>
+              <th>Exit</th>
+              <th>Grace</th>
+              <th>HalfDay</th>
+            </tr>
+
+            <tr *ngFor="let s of shifts">
+              <td>{{ s.FullName }}</td>
+              <td>{{ s.EntryTime }}</td>
+              <td>{{ s.ExitTime }}</td>
+              <td>{{ s.GraceMinutes }} min</td>
+              <td>{{ s.HalfDayAfterMinutes }} min</td>
+            </tr>
+          </table>
+
+        </section>
+</div>
+
+  </div>
+</div>

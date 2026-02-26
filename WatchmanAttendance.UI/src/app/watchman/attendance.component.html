@@ -1,0 +1,67 @@
+<div class="attendance-page">
+  <div class="attendance-card">
+
+    <!-- HEADER -->
+    <div class="attendance-header">
+      <h2 class="attendance-title" style="color: #FFA500">Mark Attendance</h2>
+      <p class="attendance-subtitle">
+        Align your face and confirm your attendance
+      </p>
+    </div>
+
+    <!-- ================= BEFORE SUCCESS ================= -->
+    <ng-container *ngIf="!success">
+
+      <!-- CAMERA PREVIEW -->
+      <div class="camera-box">
+        <video #video autoplay muted playsinline></video>
+
+        <!-- FACE GUIDE -->
+        <div class="face-overlay">
+          <div class="face-frame"
+               [class.detected]="faceDetected">
+          </div>
+        </div>
+      </div>
+
+      <!-- HIDDEN CANVAS -->
+      <canvas #canvas hidden></canvas>
+
+      <!-- FACE STATUS -->
+      <p class="face-status"
+         [class.detected]="faceDetected">
+        {{
+ faceDetected
+          ? 'Face detected ✔'
+          : 'Position your face inside the circle'
+        }}
+      </p>
+
+      <!-- ACTION -->
+      <button class="btn-primary w-full"
+              (click)="captureAndSubmit()"
+              [disabled]="loading || !faceDetected">
+
+        {{ loading ? 'Submitting…' : 'Mark Attendance' }}
+      </button>
+
+      <!-- ERROR -->
+      <p class="error" *ngIf="message">
+        {{ message }}
+      </p>
+
+    </ng-container>
+
+    <!-- ================= AFTER SUCCESS ================= -->
+    <ng-container *ngIf="success">
+      <div class="success-box">
+        <div class="success-icon">✅</div>
+        <h3 class="success-title">Attendance Recorded</h3>
+        <p class="success-text">
+          You may now close this page
+        </p>
+      </div>
+    </ng-container>
+
+  </div>
+</div>

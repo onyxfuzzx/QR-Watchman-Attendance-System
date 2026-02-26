@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="WatchmanAttendance.UI.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+</Solution>

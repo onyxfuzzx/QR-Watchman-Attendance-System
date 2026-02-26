@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================= ROOT ================= */
+@layer base {
+  body {
+    @apply bg-slate-50 text-gray-900 font-sans antialiased;
+  }
+}
+
+/* ================= COMPONENTS ================= */
+@layer components {
+
+  /* ---------- INPUTS ---------- */
+  .input {
+    @apply w-full h-11 px-4 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition;
+  }
+
+  textarea {
+    @apply w-full p-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500;
+  }
+
+  select {
+    @apply input;
+  }
+
+  /* ---------- BUTTONS ---------- */
+
+  .btn-primary {
+    @apply bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2.5 rounded-lg text-sm font-medium transition;
+  }
+
+  .btn-danger {
+    @apply bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition;
+  }
+
+  .btn-success {
+    @apply bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition;
+  }
+
+  .btn-warning {
+    @apply bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition;
+  }
+
+  .btn-link {
+    @apply text-emerald-600 hover:underline text-sm font-medium;
+  }
+
+  /* ---------- BADGES ---------- */
+
+  .badge {
+    @apply px-3 py-1 rounded-full text-xs font-medium inline-flex items-center;
+  }
+
+    .badge.present,
+    .badge.ok,
+    .badge.approved {
+      @apply bg-emerald-100 text-emerald-700;
+    }
+
+    .badge.late {
+      @apply bg-yellow-100 text-yellow-700;
+    }
+
+    .badge.halfday {
+      @apply bg-orange-100 text-orange-700;
+    }
+
+    .badge.fail,
+    .badge.rejected {
+      @apply bg-red-100 text-red-700;
+    }
+
+    .badge.pending {
+      @apply bg-gray-200 text-gray-700;
+    }
+
+  /* ---------- TEXT HELPERS ---------- */
+
+  .muted {
+    @apply text-sm text-gray-500;
+  }
+
+  .empty {
+    @apply text-center text-sm text-gray-500 py-6;
+  }
+
+  /* ---------- TABLE ---------- */
+
+  .table {
+    @apply w-full border-collapse text-sm;
+  }
+
+    .table th {
+      @apply text-left font-medium px-4 py-3 bg-gray-100;
+    }
+
+    .table td {
+      @apply px-4 py-3 border-b border-gray-200;
+    }
+
+  /* ---------- CARDS ---------- */
+
+  .card {
+    @apply bg-white rounded-2xl border border-gray-200 p-6 shadow-sm;
+  }
+
+  /* ---------- TABS ---------- */
+
+  .tabs {
+    @apply flex flex-wrap gap-2;
+  }
+
+    .tabs button {
+      @apply px-4 py-2 rounded-lg border border-gray-200 bg-white text-sm font-medium transition;
+    }
+
+      .tabs button.active {
+        @apply bg-gray-900 text-white border-gray-900;
+      }
+}

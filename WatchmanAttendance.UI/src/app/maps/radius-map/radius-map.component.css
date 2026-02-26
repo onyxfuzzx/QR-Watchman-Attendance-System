@@ -1,0 +1,55 @@
+/* ================= PAGE ================= */
+
+.page {
+  @apply min-h-screen bg-slate-50 px-6 py-8;
+}
+
+/* ================= HEADER ================= */
+
+.map-header {
+  @apply flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6;
+}
+
+  .map-header h1 {
+    @apply text-2xl font-semibold text-gray-900;
+  }
+
+  .map-header p {
+    @apply text-sm text-gray-500;
+  }
+
+.header-actions {
+  @apply flex gap-3;
+}
+
+/* ================= INFO BAR ================= */
+
+.info-bar {
+  @apply bg-white border border-gray-200 rounded-xl shadow-sm px-6 py-4 mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4;
+}
+
+  .info-bar > div {
+    @apply flex flex-col;
+  }
+
+  .info-bar .label {
+    @apply text-xs text-gray-500 uppercase tracking-wide;
+  }
+
+  .info-bar span:last-child {
+    @apply text-sm font-medium text-gray-900;
+  }
+
+/* ================= MAP ================= */
+
+.map {
+  @apply w-full h-[65vh] rounded-2xl border border-gray-200 shadow-sm bg-gray-100;
+}
+
+/* ================= BUTTON OVERRIDES ================= */
+/* Uses your global styles, just adds spacing polish */
+
+.btn-primary,
+.btn-secondary {
+  @apply whitespace-nowrap;
+}

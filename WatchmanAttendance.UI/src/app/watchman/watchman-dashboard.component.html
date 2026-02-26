@@ -1,0 +1,292 @@
+<div class="wm-container">
+
+  <!-- HEADER -->
+  <div class="wm-header">
+    <div>
+      <h1 class="wm-title">Welcome, {{ watchmanName }}</h1>
+      <p class="wm-subtitle">Your attendance dashboard</p>
+    </div>
+
+    <button class="btn btn-danger" (click)="logout()">Logout</button>
+  </div>
+
+  <!-- TABS -->
+  <div class="wm-tabs">
+    <button class="wm-tab"
+            [class.active]="activeTab === 'overview'"
+            (click)="switchTab('overview')">
+      Overview
+    </button>
+
+    <button class="wm-tab"
+            [class.active]="activeTab === 'requests'"
+            (click)="switchTab('requests')">
+      Attendance Requests
+    </button>
+  </div>
+
+  <!-- ================= OVERVIEW ================= -->
+  <ng-container *ngIf="activeTab === 'overview'">
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Monthly Attendance</h2>
+        <button class="btn btn-warning" (click)="openLateRequest()">
+          Request Late Arrival
+        </button>
+      </div>
+
+      <div *ngIf="attendance.length === 0" class="empty">
+        No attendance records found.
+      </div>
+
+      <div class="table-wrapper" *ngIf="attendance.length > 0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Punch</th>
+              <th>Status</th>
+              <th>Location</th>
+              <th></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let a of attendance">
+              <td>{{ a.date | date }}</td>
+              <td>{{ a.punchTime | date:'shortTime' }}</td>
+
+              <td>
+                <span class="badge"
+                      [ngClass]="{
+                        present: a.status === 'Present',
+                        late: a.status === 'Late',
+                        halfday: a.status === 'HalfDay'
+                      }">
+                  {{ a.status }}
+                </span>
+              </td>
+
+              <td>
+                <span class="badge ok" *ngIf="a.locationVerified">Verified</span>
+                <span class="badge fail" *ngIf="!a.locationVerified">Failed</span>
+              </td>
+
+              <td>
+                <button *ngIf="a.status !== 'Present'"
+                        class="btn btn-ghost"
+                        (click)="startRequest(a)">
+                  Request
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- ================= REQUESTS ================= -->
+  <ng-container *ngIf="activeTab === 'requests'">
+
+    <div class="card">
+      <h2>Submit Attendance Request</h2>
+
+      <div *ngIf="!selectedAttendance" class="empty">
+        Select an attendance record from Overview to submit a request.
+      </div>
+
+      <div *ngIf="selectedAttendance" class="request-form">
+        <p><strong>Date:</strong> {{ selectedAttendance.date | date }}</p>
+        <p><strong>Type:</strong> {{ selectedAttendance.status }}</p>
+
+        <textarea rows="4"
+                  placeholder="Enter reason"
+                  [(ngModel)]="requestReason">
+        </textarea>
+
+        <button class="btn btn-primary"
+                [disabled]="!requestReason"
+                (click)="submitRequest()">
+          Submit Request
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>My Requests</h2>
+
+      <div *ngIf="requests.length === 0" class="empty">
+        No requests submitted yet.
+      </div>
+
+      <div class="table-wrapper" *ngIf="requests.length > 0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let r of requests">
+              <td>{{ r.attendanceDate | date }}</td>
+              <td>{{ r.type }}</td>
+              <td>
+                <span class="badge"
+                      [ngClass]="{
+                        pending: r.status === 'Pending',
+                        approved: r.status === 'Approved',
+                        rejected: r.status === 'Rejected'
+                      }">
+                  {{ r.status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </ng-container>
+
+</div>
+
+
+<!--<div class="dashboard">-->
+<!-- HEADER -->
+<!--<div class="header">
+  <div>
+    <h1>Welcome, {{ watchmanName }}</h1>
+    <p class="muted">Your attendance dashboard</p>
+  </div>
+  <button class="btn-danger" (click)="logout()">Logout</button>
+</div>-->
+<!-- TABS -->
+<!--<div class="tabs">
+  <button [class.active]="activeTab === 'overview'"
+          (click)="switchTab('overview')">
+    Overview
+  </button>
+
+  <button [class.active]="activeTab === 'requests'"
+          (click)="switchTab('requests')">
+    Attendance Requests
+  </button>
+</div>-->
+<!-- ================= OVERVIEW ================= -->
+<!--<ng-container *ngIf="activeTab === 'overview'">
+
+  <section class="card">
+    <h2>Monthly Attendance</h2>
+
+    <div *ngIf="attendance.length === 0" class="empty">
+      No attendance records
+    </div>
+
+    <div class="table" *ngIf="attendance.length > 0">
+      <div class="table-header">
+        <span>Date</span>
+        <span>Punch</span>
+        <span>Status</span>
+        <span>Location</span>
+        <span>Action</span>
+      </div>
+
+      <div class="table-row" *ngFor="let a of attendance">
+        <span>{{ a.date | date }}</span>
+        <span>{{ a.punchTime | date:'shortTime' }}</span>
+
+        <span class="badge"
+              [ngClass]="{
+                present: a.status === 'Present',
+                late: a.status === 'Late',
+                halfday: a.status === 'HalfDay'
+              }">
+          {{ a.status }}
+        </span>
+
+        <span class="badge ok" *ngIf="a.locationVerified">Verified</span>
+        <span class="badge fail" *ngIf="!a.locationVerified">Failed</span>
+
+        <button *ngIf="a.status !== 'Present'"
+                class="btn-link"
+                (click)="startRequest(a)">
+          Request Change
+        </button>
+
+      </div>
+      <button class="btn-warning" (click)="openLateRequest()">
+        Request Late Arrival
+      </button>
+    </div>
+  </section>
+
+</ng-container>-->
+<!-- ================= REQUESTS ================= -->
+<!--<ng-container *ngIf="activeTab === 'requests'">
+
+    <section class="card">
+      <h2>Submit Request</h2>
+
+      <div *ngIf="!selectedAttendance" class="empty">
+        Select an attendance record from Overview
+      </div>
+
+      <div *ngIf="selectedAttendance">
+        <p><strong>Date:</strong> {{ selectedAttendance.date | date }}</p>
+        <p><strong>Type:</strong> {{ selectedAttendance.status }}</p>
+
+        <textarea rows="4"
+                  placeholder="Enter reason"
+                  [(ngModel)]="requestReason">
+        </textarea>
+
+        <button class="btn-primary"
+                [disabled]="!requestReason"
+                (click)="submitRequest()">
+          Submit Request
+        </button>
+
+
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>My Requests</h3>
+
+      <div *ngIf="requests.length === 0" class="empty">
+        No requests yet
+      </div>
+
+      <table *ngIf="requests.length > 0" class="table">
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Status</th>
+        </tr>
+
+        <tr *ngFor="let r of requests">
+          <td>{{ r.attendanceDate | date }}</td>
+          <td>{{ r.type }}</td>
+          <td>
+            <span class="badge"
+                  [ngClass]="{
+                    pending: r.status === 'Pending',
+                    approved: r.status === 'Approved',
+                    rejected: r.status === 'Rejected'
+                  }">
+              {{ r.status }}
+            </span>
+          </td>
+        </tr>
+      </table>
+    </section>
+
+  </ng-container>
+
+</div>-->

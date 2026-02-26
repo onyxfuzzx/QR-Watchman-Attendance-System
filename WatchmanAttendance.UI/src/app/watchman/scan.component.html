@@ -1,0 +1,42 @@
+<div class="scan-wrapper">
+
+  <!-- LOADING -->
+  <div *ngIf="status === 'loading'" class="scan-card">
+    <h2 class="scan-title">Scanning QR</h2>
+    <p class="scan-subtitle">Please wait…</p>
+  </div>
+
+  <!-- SUCCESS -->
+  <div *ngIf="status === 'success'" class="scan-card scan-success">
+
+    <!-- ✅ ANIMATED TICK -->
+    <div class="tick-wrapper">
+      <svg class="tick" viewBox="0 0 52 52">
+        <circle class="tick-circle" cx="26" cy="26" r="25" />
+        <path class="tick-check" d="M14 27l7 7 17-17" />
+      </svg>
+    </div>
+
+    <h2 class="scan-title">QR Verified</h2>
+    <p class="scan-message">{{ message }}</p>
+    <p class="scan-subtitle">Redirecting to attendance…</p>
+
+  </div>
+
+  <!-- ERROR -->
+  <div *ngIf="status === 'error'" class="scan-card scan-error">
+
+    <!-- RED CROSS -->
+    <div class="cross-wrapper">
+      <svg class="cross" viewBox="0 0 52 52">
+        <circle class="cross-circle" cx="26" cy="26" r="25" />
+        <path class="cross-line cross-line-1" d="M16 16l20 20" />
+        <path class="cross-line cross-line-2" d="M36 16l-20 20" />
+      </svg>
+    </div>
+
+    <h2 class="scan-title">Invalid QR</h2>
+    <p class="scan-message">{{ message }}</p>
+  </div>
+
+</div>

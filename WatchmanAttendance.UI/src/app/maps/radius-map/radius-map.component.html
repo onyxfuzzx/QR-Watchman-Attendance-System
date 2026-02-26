@@ -1,0 +1,42 @@
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="map-header">
+    <div>
+      <h1>Attendance Location</h1>
+      <p>Allowed Radius & Watchman Position</p>
+    </div>
+
+    <div class="header-actions">
+      <button (click)="recenter()" class="btn-secondary">
+        Recenter
+      </button>
+
+      <button (click)="toggleRadius()" class="btn-primary">
+        {{ showRadius ? 'Hide Radius' : 'Show Radius' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- INFO BAR -->
+  <div class="info-bar">
+    <div>
+      <span class="label">Latitude</span>
+      <span>{{ lat }}</span>
+    </div>
+
+    <div>
+      <span class="label">Longitude</span>
+      <span>{{ lng }}</span>
+    </div>
+
+    <div>
+      <span class="label">Allowed Radius</span>
+      <span>{{ radius }} m</span>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div id="map" class="map"></div>
+
+</div>

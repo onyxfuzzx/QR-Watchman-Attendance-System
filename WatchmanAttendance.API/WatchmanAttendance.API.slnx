@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="../WatchmanAttendance.UI/WatchmanAttendance.UI.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="WatchmanAttendance.API.csproj" />
+</Solution>
