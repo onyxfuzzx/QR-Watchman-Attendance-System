@@ -390,6 +390,7 @@ If you prefer to stay entirely on Azure:
 - [ ] Add your production frontend domain to CORS `WithOrigins(...)`
 - [ ] Point `app-config.ts` to the production API URL
 - [ ] Restrict your Google Maps API key to your production domain
+- [ ] Add Google Maps Api Url in /src/index.html
 - [ ] Verify SQL Server is accessible from Azure App Service
 - [ ] Deploy frontend over **HTTPS** (required for camera and GPS on mobile)
 - [ ] Deploy backend over **HTTPS**
