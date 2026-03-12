@@ -36,7 +36,11 @@ You must provide your own API key.
 
 1. Go to Google Cloud Console
 2. Create a Google Maps JavaScript API key
-3. Replace the API key in the following file:   WatchmanAttendance.UI/src/index.html
+3. Replace the API key in the following 
+file:
+```bash
+WatchmanAttendance.UI/src/index.html
+```
 
 line:
 ```bash
