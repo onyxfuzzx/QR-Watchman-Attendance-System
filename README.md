@@ -1,337 +1,417 @@
 # QR Watchman Attendance System
 
-A full-stack attendance system for security guards and watchmen. The project uses QR location validation, geofence checks, face capture, shift rules, attendance requests, and admin audit logs.
+> A full-stack QR-based attendance system for security guards and watchmen — with geofence validation, face capture, shift management, and an admin portal.
 
-## Project structure
+![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)
+![Angular](https://img.shields.io/badge/Angular-17-DD0031?logo=angular&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?logo=tailwindcss&logoColor=white)
+![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?logo=microsoftsqlserver&logoColor=white)
 
-- [WatchmanAttendance.API](WatchmanAttendance.API) - ASP.NET Core Web API (.NET 8)
-- [WatchmanAttendance.UI](WatchmanAttendance.UI) - Angular frontend
+---
 
-## Main features
+## Table of Contents
 
-### Admin features
-- Admin login
-- Create and manage watchman accounts
-- Create QR locations with map selection or auto-detected location
-- Configure radius-based geofence validation
-- View attendance records
-- Bulk or single attendance deletion
-- Review and approve/reject attendance requests
-- Assign and manage shifts
-- View audit logs
+- [How It Works](#how-it-works)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Local Development](#local-development)
+- [Build](#build)
+- [Deployment](#deployment)
+  - [Backend — Azure App Service](#backend--azure-app-service)
+  - [Frontend — Cloudflare Pages](#frontend--cloudflare-pages)
+  - [Optional — Cloudflare Worker Proxy](#optional--cloudflare-worker-proxy)
+  - [Frontend — Azure Static Web Apps (alternative)](#frontend--azure-static-web-apps-alternative)
+- [Production Checklist](#production-checklist)
+- [Troubleshooting](#troubleshooting)
 
-### Watchman features
-- Watchman login
-- Scan QR and validate location before attendance flow
-- Mark attendance with face capture and GPS location
-- View attendance dashboard
-- Submit attendance correction requests
-- Track request status
+---
 
-## Tech stack
+## How It Works
 
-### Backend
-- .NET 8
-- ASP.NET Core Web API
-- Dapper
-- SQL Server
-- JWT authentication
+```
+Admin creates QR location
+        │
+        ▼
+Watchman scans QR code (mobile browser)
+        │
+        ▼
+API validates QR token + geofence radius
+        │
+        ▼
+Watchman logs in (if not already authenticated)
+        │
+        ▼
+Watchman captures face photo + GPS position
+        │
+        ▼
+API records attendance log
+        │
+        ▼
+Admin views records, approves requests, audits logs
+```
 
-### Frontend
-- Angular 17
-- TypeScript
-- Tailwind CSS
-- Google Maps JavaScript API
+---
 
-## How the system works
+## Features
 
-1. Admin creates watchman accounts.
-2. Admin creates one or more QR locations.
-3. Watchman opens the QR link.
-4. QR is validated by the API.
-5. Watchman logs in if needed.
-6. Watchman captures attendance with face photo and current GPS position.
-7. API validates the location against the QR location radius.
-8. Admin monitors attendance, requests, and audit records.
+### Admin
+| Feature | Description |
+|---|---|
+| Watchman management | Create, view, and manage watchman accounts |
+| QR locations | Generate QR codes pinned to GPS locations with configurable radius |
+| Attendance records | View, filter, and delete attendance logs |
+| Attendance requests | Review and approve/reject correction requests |
+| Shift management | Assign and manage watchman shifts |
+| Audit logs | Full audit trail of admin actions |
+
+### Watchman
+| Feature | Description |
+|---|---|
+| QR scan | Scan a QR code to start the attendance flow |
+| Geofence check | Location validated against the QR pin radius |
+| Face capture | Take a photo as part of the attendance record |
+| Dashboard | View personal attendance history |
+| Requests | Submit correction requests and track their status |
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | ASP.NET Core Web API (.NET 8), Dapper, JWT |
+| Database | SQL Server / Azure SQL |
+| Frontend | Angular 17, TypeScript, Tailwind CSS |
+| Maps | Google Maps JavaScript API |
+| Hosting (recommended) | Azure App Service + Cloudflare Pages |
+
+---
+
+## Project Structure
+
+```
+QR-Watchman-Attendance-System/
+├── WatchmanAttendance.API/       # ASP.NET Core Web API
+│   ├── Controllers/              # API endpoints
+│   ├── DTOs/                     # Request/response models
+│   ├── Models/                   # Domain models
+│   ├── Repositories/             # Data access (Dapper)
+│   ├── Services/                 # JWT, geo, timezone helpers
+│   ├── appsettings.json          # Configuration
+│   └── Program.cs                # App setup, CORS, middleware
+│
+└── WatchmanAttendance.UI/        # Angular 17 frontend
+    └── src/app/
+        ├── admin/                # Admin dashboard
+        ├── auth/                 # Login pages
+        ├── watchman/             # Watchman dashboard, QR scan, attendance
+        ├── config/app-config.ts  # API URL config
+        └── app.routes.ts         # Routing
+```
+
+---
 
 ## Prerequisites
 
-Install these before running the project:
-
-- .NET 8 SDK
-- Node.js 18 or later
-- npm
+- [.NET 8 SDK](https://dotnet.microsoft.com/download)
+- [Node.js 18+](https://nodejs.org/) and npm
 - SQL Server or SQL Server Express
-- Optional: Azure account for deployment
-- Optional: Cloudflare account for Pages or Workers
+- A Google Maps API key (for the map picker)
+- *(optional)* Azure account for deployment
+- *(optional)* Cloudflare account for Pages / Workers
 
-## Local development setup
+---
 
-## 1. Clone the repository
+## Local Development
 
-- `git clone <your-repository-url>`
-- `cd QR-Watchman-Attendance-System`
+### 1. Clone the repository
 
-## 2. Configure the backend
+```bash
+git clone https://github.com/your-username/QR-Watchman-Attendance-System.git
+cd QR-Watchman-Attendance-System
+```
 
-Open [WatchmanAttendance.API/appsettings.json](WatchmanAttendance.API/appsettings.json) and update:
+### 2. Set up the database
 
-- `ConnectionStrings:Default`
-- `Jwt:Key`
-- `Jwt:Issuer`
-- `Jwt:Audience`
-- `Frontend:BaseUrl`
+Create an empty SQL Server database, then run the setup script:
 
-Example values already exist in the file for local development.
+```bash
+sqlcmd -S localhost -d WatchmanAttendance -i sql/setup.sql
+```
 
-Current important values:
-- Local API base URL: `http://localhost:5036`
-- Local frontend URL: `http://localhost:4200`
+Or open [sql/setup.sql](sql/setup.sql) in SQL Server Management Studio and execute it against your database.
 
-## 3. Run the backend API
+This script creates all tables and inserts the default admin account:
 
-From [WatchmanAttendance.API](WatchmanAttendance.API):
+| Field    | Value             |
+|----------|-------------------|
+| Username | `admin@surge.com` |
+| Password | `12345678`        |
 
-- `dotnet restore`
-- `dotnet build`
-- `dotnet run`
+> **Change the admin password** after your first login in production.
 
-If you want a specific profile, use the launch profile defined in [WatchmanAttendance.API/Properties/launchSettings.json](WatchmanAttendance.API/Properties/launchSettings.json).
+### 3. Configure the backend
 
-## 4. Configure the frontend API URL
+Edit `WatchmanAttendance.API/appsettings.json`:
 
-Open [WatchmanAttendance.UI/src/app/config/app-config.ts](WatchmanAttendance.UI/src/app/config/app-config.ts).
+```json
+{
+  "ConnectionStrings": {
+    "Default": "Server=localhost;Database=WatchmanAttendance;Trusted_Connection=True;"
+  },
+  "Jwt": {
+    "Key": "your-secret-key-at-least-32-characters",
+    "Issuer": "WatchmanAttendanceAPI",
+    "Audience": "WatchmanAttendanceClient"
+  },
+  "Frontend": {
+    "BaseUrl": "http://localhost:4200"
+  }
+}
+```
 
-For local development it should point to:
-- `apiUrl: 'http://localhost:5036/api'`
-- `baseUrl: 'http://localhost:5036'`
+> **Never commit real secrets.** Use `appsettings.Development.json` locally and environment variables in production.
 
-## 5. Run the frontend
+### 4. Run the API
 
-From [WatchmanAttendance.UI](WatchmanAttendance.UI):
+```bash
+cd WatchmanAttendance.API
+dotnet restore
+dotnet run
+```
 
-- `npm install`
-- `npm start`
+API runs at:
+- HTTP: `http://localhost:5036`
+- Swagger: `http://localhost:5036/swagger`
 
-Or:
-- `npx ng serve`
+### 5. Configure the frontend
 
-The app should open at:
-- `http://localhost:4200`
+Edit `WatchmanAttendance.UI/src/app/config/app-config.ts`:
 
-## Important local notes
+```ts
+export const AppConfig = {
+  apiUrl: 'http://localhost:5036/api',
+  baseUrl: 'http://localhost:5036',
+};
+```
 
-### CORS
-CORS is configured in [WatchmanAttendance.API/Program.cs](WatchmanAttendance.API/Program.cs). If you change the frontend domain or port, update the allowed origins.
+### 6. Run the frontend
 
-### HTTPS
-In this project, local frontend-to-backend communication has been configured to use HTTP on port `5036` to avoid local certificate issues.
+```bash
+cd WatchmanAttendance.UI
+npm install
+npx ng serve
+```
 
-### Google Maps
-If you use the map picker, make sure the Google Maps script key in [WatchmanAttendance.UI/src/index.html](WatchmanAttendance.UI/src/index.html) is valid.
+Frontend runs at `http://localhost:4200`.
 
-## Build commands
+---
+
+## Build
 
 ### Backend
-From [WatchmanAttendance.API](WatchmanAttendance.API):
-- `dotnet build`
+
+```bash
+cd WatchmanAttendance.API
+dotnet build -c Release
+```
 
 ### Frontend
-From [WatchmanAttendance.UI](WatchmanAttendance.UI):
-- `npm run build`
 
-Angular production output is generated in:
-- [WatchmanAttendance.UI/dist/watchman-attendance-ui](WatchmanAttendance.UI/dist/watchman-attendance-ui)
+```bash
+cd WatchmanAttendance.UI
+npm run build
+```
 
-## Deployment overview
+Output: `WatchmanAttendance.UI/dist/watchman-attendance-ui/browser/`
 
-Recommended production setup:
+---
 
-- Frontend: Cloudflare Pages or Azure Static Web Apps
-- Backend API: Azure App Service
-- Database: Azure SQL Database or a reachable SQL Server instance
-- Optional edge proxy: Cloudflare Worker
+## Deployment
 
-## Deploy backend to Azure App Service
+Recommended production architecture:
 
-This is the simplest production option for the .NET API.
+```
+Browser
+  │
+  ├── https://app.yourdomain.com  ──►  Cloudflare Pages  (Angular UI)
+  │
+  └── https://api.yourdomain.com  ──►  Cloudflare Worker (optional proxy)
+                                            │
+                                            ▼
+                                     Azure App Service  (.NET API)
+                                            │
+                                            ▼
+                                       Azure SQL Database
+```
 
-## Azure resources to create
+---
 
-Create these resources in Azure:
+### Backend — Azure App Service
 
-- App Service Plan
-- Web App for the API
-- Azure SQL Database or SQL Server
-- Optional: Application Insights
+**1. Publish the API**
 
-## Backend deployment steps
+```bash
+cd WatchmanAttendance.API
+dotnet publish -c Release -o ./publish
+```
 
-### 1. Publish the API
-From [WatchmanAttendance.API](WatchmanAttendance.API):
+**2. Create Azure resources**
 
-- `dotnet publish -c Release -o ./publish`
+- App Service Plan (Linux or Windows, .NET 8 runtime)
+- Web App
+- Azure SQL Database (or connect to an existing SQL Server)
 
-### 2. Create the Azure Web App
-Use Azure Portal or Azure CLI.
+**3. Set App Service configuration**
 
-Suggested runtime:
-- .NET 8
-- Windows or Linux App Service
+Add these as **Application Settings** in the Azure Portal (or via Azure CLI):
 
-### 3. Configure App Service settings
-In the Azure Web App configuration, add settings for:
+| Setting | Value |
+|---|---|
+| `ConnectionStrings__Default` | Your Azure SQL connection string |
+| `Jwt__Key` | A strong random secret (32+ characters) |
+| `Jwt__Issuer` | `WatchmanAttendanceAPI` |
+| `Jwt__Audience` | `WatchmanAttendanceClient` |
+| `Frontend__BaseUrl` | Your production frontend URL |
 
-- `ConnectionStrings__Default`
-- `Jwt__Key`
-- `Jwt__Issuer`
-- `Jwt__Audience`
-- `Frontend__BaseUrl`
+**4. Update CORS**
 
-Use environment variables in Azure instead of storing production secrets in source control.
+In `WatchmanAttendance.API/Program.cs`, add your production frontend domain to `WithOrigins(...)`:
 
-### 4. Configure CORS in the API
-Update [WatchmanAttendance.API/Program.cs](WatchmanAttendance.API/Program.cs) so `WithOrigins(...)` includes your production frontend domain, for example:
+```csharp
+policy.WithOrigins(
+    "http://localhost:4200",
+    "https://your-frontend.pages.dev",
+    "https://app.yourdomain.com"
+)
+```
 
-- `https://your-frontend.pages.dev`
-- `https://attendance.yourdomain.com`
+**5. Deploy**
 
-### 5. Deploy published files
-Deploy the `publish` folder to Azure App Service using:
+Deploy the `publish/` folder using any of:
+- Azure CLI: `az webapp deploy`
+- Visual Studio publish profile
+- GitHub Actions (zip deploy)
 
-- Visual Studio publish
-- Zip deploy
-- GitHub Actions
-- Azure CLI
+---
 
-## Example production backend settings
+### Frontend — Cloudflare Pages
 
-Typical values:
+**1. Update the API URL**
 
-- API URL: `https://your-api.azurewebsites.net`
-- Swagger URL: `https://your-api.azurewebsites.net/swagger`
+In `WatchmanAttendance.UI/src/app/config/app-config.ts`:
 
-## Deploy frontend to Cloudflare Pages
+```ts
+export const AppConfig = {
+  apiUrl: 'https://your-api.azurewebsites.net/api',
+  baseUrl: 'https://your-api.azurewebsites.net',
+};
+```
 
-Cloudflare Pages is a good option for the Angular UI because it serves static files globally.
+**2. Build**
 
-## Frontend build configuration
+```bash
+cd WatchmanAttendance.UI
+npm install
+npm run build
+```
 
-Before building for production, update [WatchmanAttendance.UI/src/app/config/app-config.ts](WatchmanAttendance.UI/src/app/config/app-config.ts):
+**3. Create a Cloudflare Pages project**
 
-- `apiUrl` should point to your deployed API, for example `https://your-api.azurewebsites.net/api`
-- `baseUrl` should point to your deployed API root, for example `https://your-api.azurewebsites.net`
+In the Cloudflare dashboard, create a new Pages project with:
 
-Then build the app:
+| Setting | Value |
+|---|---|
+| Framework preset | None (or Angular) |
+| Build command | `npm run build` |
+| Build output directory | `dist/watchman-attendance-ui/browser` |
 
-- `npm install`
-- `npm run build`
+**4. Fix Angular client-side routing**
 
-## Cloudflare Pages settings
+Add a `_redirects` file inside `WatchmanAttendance.UI/src/` (and make sure it gets copied to the build output, or add it directly to `dist/…/browser/` after build):
 
-When creating the Pages project, use:
+```
+/*    /index.html    200
+```
 
-- Framework preset: Angular or None
-- Build command: `npm run build`
-- Build output directory: `dist/watchman-attendance-ui/browser`
+This prevents `/login`, `/scan/:token`, and other Angular routes from returning 404 on page refresh.
 
-If that folder does not exist in your build output, use the generated folder shown after the Angular build completes.
+Alternatively, enable the "Single Page Application" fallback in the Cloudflare Pages settings.
 
-## Cloudflare Pages routing
+---
 
-Because Angular is a single-page application, add a fallback for client-side routes.
+### Optional — Cloudflare Worker Proxy
 
-Recommended approach:
-- Configure Pages to serve `index.html` for unknown routes
-- Or add `_redirects` support if you choose that approach in your deployment pipeline
+Use a Cloudflare Worker to expose the Azure API under a custom domain (e.g. `api.yourdomain.com`).
 
-This prevents direct links such as `/login`, `/scan/:token`, or `/watchman/dashboard` from returning 404.
+**Example Worker script:**
 
-## Use Cloudflare Worker with this project
+```js
+export default {
+  async fetch(request) {
+    const url = new URL(request.url);
+    url.hostname = 'your-api.azurewebsites.net';
+    return fetch(new Request(url.toString(), request));
+  }
+};
+```
 
-Cloudflare Workers cannot run this ASP.NET Core API directly as-is.
+Then update `app-config.ts`:
 
-Practical use of Workers for this project:
-- reverse proxy requests to the Azure API
-- add a custom API domain like `api.yourdomain.com`
-- handle edge headers or basic request rewriting
+```ts
+export const AppConfig = {
+  apiUrl: 'https://api.yourdomain.com/api',
+  baseUrl: 'https://api.yourdomain.com',
+};
+```
 
-So the practical architecture is:
+> Cloudflare Workers cannot host an ASP.NET Core app directly. Use Workers as a proxy in front of your Azure App Service only.
 
-- Angular UI on Cloudflare Pages
-- .NET API on Azure App Service
-- optional Cloudflare Worker in front of the Azure API
+---
 
-## Example Worker use case
+### Frontend — Azure Static Web Apps (alternative)
 
-You can point:
-- `https://app.yourdomain.com` -> Cloudflare Pages
-- `https://api.yourdomain.com` -> Cloudflare Worker -> Azure App Service API
+If you prefer to stay entirely on Azure:
 
-Then set frontend config to:
-- `apiUrl: 'https://api.yourdomain.com/api'`
-- `baseUrl: 'https://api.yourdomain.com'`
+1. Create an **Azure Static Web Apps** resource.
+2. Set the build output to `dist/watchman-attendance-ui/browser`.
+3. Azure Static Web Apps handles SPA routing automatically via its built-in fallback.
 
-## Deploy frontend to Azure instead
+---
 
-If you prefer Azure only, you can also deploy the Angular app to:
+## Production Checklist
 
-- Azure Static Web Apps
-- Azure App Service as static files
+- [ ] Replace the default JWT secret with a strong random value
+- [ ] Change the default admin password (`admin@surge.com` / `12345678`) immediately
+- [ ] Store all secrets in Azure App Settings, not in source code
+- [ ] Add your production frontend domain to CORS `WithOrigins(...)`
+- [ ] Point `app-config.ts` to the production API URL
+- [ ] Restrict your Google Maps API key to your production domain
+- [ ] Verify SQL Server is accessible from Azure App Service
+- [ ] Deploy frontend over **HTTPS** (required for camera and GPS on mobile)
+- [ ] Deploy backend over **HTTPS**
+- [ ] Test the full QR scan → login → attendance flow on a real mobile device
+- [ ] Configure SPA fallback (`_redirects` or platform setting) for Angular routing
+- [ ] Ensure the `Uploads/` folder (or equivalent) is on persistent storage
 
-In that case:
-- frontend stays on Azure
-- backend stays on Azure App Service
-- database stays on Azure SQL
+---
 
-## Production checklist
+## Troubleshooting
 
-Before going live, make sure you:
+**QR opens but asks for login**
+Expected. If the watchman is not signed in, the app redirects to login and then continues to the attendance flow automatically after login.
 
-- change the JWT secret
-- store all secrets in Azure configuration or secret storage
-- update CORS allowed origins
-- update [WatchmanAttendance.UI/src/app/config/app-config.ts](WatchmanAttendance.UI/src/app/config/app-config.ts) to production URLs
-- verify Google Maps API key restrictions
-- verify SQL connectivity from Azure
-- test QR scan flow on a real mobile device
-- test camera permission and GPS permission on HTTPS
-- make sure uploads are stored in a persistent location if needed
+**Camera or GPS not working in production**
+Both APIs require HTTPS. Make sure your frontend and backend are both deployed with valid TLS certificates.
 
-## Common issues
+**Angular route returns 404 on page refresh**
+You need a SPA fallback. Add a `_redirects` file on Cloudflare Pages or enable the SPA fallback on Azure Static Web Apps.
 
-### QR opens but asks for login
-Expected behavior if the watchman is not signed in. After login, the app should continue to attendance.
+**API blocked by CORS**
+Add your deployed frontend URL to `WithOrigins(...)` in `Program.cs` and redeploy the API.
 
-### Camera or GPS does not work in production
-Camera and geolocation usually require HTTPS in browsers, especially on mobile. Make sure both frontend and backend are deployed over HTTPS.
-
-### Angular route 404 on refresh
-Configure SPA fallback on Cloudflare Pages or Azure Static Web Apps.
-
-### API blocked by CORS
-Add your deployed frontend domain to `WithOrigins(...)` in [WatchmanAttendance.API/Program.cs](WatchmanAttendance.API/Program.cs).
-
-### Cloudflare Worker cannot host .NET API directly
-Correct. Use Worker as a proxy layer, not as the runtime for this ASP.NET Core app.
-
-## Suggested production architecture
-
-### Option 1: Recommended
-- Angular UI -> Cloudflare Pages
-- API -> Azure App Service
-- Database -> Azure SQL
-- Optional edge proxy -> Cloudflare Worker
-
-### Option 2: Azure only
-- Angular UI -> Azure Static Web Apps
-- API -> Azure App Service
-- Database -> Azure SQL
-
-## Useful files
-
-- [README.md](README.md)
-- [WatchmanAttendance.API/Program.cs](WatchmanAttendance.API/Program.cs)
-- [WatchmanAttendance.API/appsettings.json](WatchmanAttendance.API/appsettings.json)
-- [WatchmanAttendance.UI/src/app/config/app-config.ts](WatchmanAttendance.UI/src/app/config/app-config.ts)
-- [WatchmanAttendance.UI/angular.json](WatchmanAttendance.UI/angular.json)
+**`Cloudflare Worker cannot host the .NET API`**
+Correct — Workers run JavaScript/WASM at the edge. Use Workers as a reverse proxy in front of your Azure App Service, not as the API host.

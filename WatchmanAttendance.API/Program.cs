@@ -105,8 +105,7 @@ builder.Services.AddCors(options =>
                     "http://localhost:4200",
                     "https://localhost:4200",
                     "http://localhost:5240",
-                    "https://localhost:7098",
-                    "https://guard.abacusx.com"
+                    "https://localhost:7098"
                 )
                 .AllowAnyHeader()
                 .AllowAnyMethod()
@@ -117,7 +116,6 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Middleware
-// Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -126,10 +124,10 @@ if (app.Environment.IsDevelopment())
 
 //app.UseHttpsRedirection();
 
-/* ✅ REQUIRED */
+/*  REQUIRED */
 app.UseRouting();
 
-/* ✅ CORS MUST be after routing */
+/*  CORS MUST be after routing */
 app.UseCors("AllowAngular");
 
 /* auth AFTER cors */
