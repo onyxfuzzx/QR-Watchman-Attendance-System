@@ -8,7 +8,7 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   if (!auth.isLoggedIn()) {
     router.navigate(
-      ['/watchman/login'],
+      ['/login'],
       { queryParams: { redirect: state.url } }
     );
     return false;

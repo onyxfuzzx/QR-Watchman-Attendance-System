@@ -3,9 +3,13 @@
 
     <!-- HEADER -->
     <div class="header">
-      <h1>Admin Dashboard</h1>
+      <div>
+        <h1>Admin Dashboard</h1>
+        <p class="header-subtitle">Manage watchmen, attendance, QR locations & more</p>
+      </div>
       <button (click)="logout()" class="btn-danger">
-        Logout
+        <app-icon name="logout" [size]="16"></app-icon>
+        <span>Logout</span>
       </button>
     </div>
 
@@ -13,36 +17,43 @@
     <div class="tabs">
       <button (click)="setTab(ADMIN_TABS.watchmen)"
               [class.active]="isTab(ADMIN_TABS.watchmen)">
-        Watchmen
+        <app-icon name="users" [size]="16"></app-icon>
+        <span>Watchmen</span>
       </button>
 
       <button (click)="setTab(ADMIN_TABS.attendance)"
               [class.active]="isTab(ADMIN_TABS.attendance)">
-        Attendance
+        <app-icon name="calendar" [size]="16"></app-icon>
+        <span>Attendance</span>
       </button>
 
       <button (click)="setTab(ADMIN_TABS.qr)"
               [class.active]="isTab(ADMIN_TABS.qr)">
-        QR
+        <app-icon name="qr" [size]="16"></app-icon>
+        <span>QR Locations</span>
       </button>
 
       <button (click)="setTab(ADMIN_TABS.audit)"
               [class.active]="isTab(ADMIN_TABS.audit)">
-        Audit
+        <app-icon name="clipboard" [size]="16"></app-icon>
+        <span>Audit Log</span>
       </button>
 
       <button (click)="setTab(ADMIN_TABS.requests)"
               [class.active]="isTab(ADMIN_TABS.requests)">
-        Requests
+        <app-icon name="bell" [size]="16"></app-icon>
+        <span>Requests</span>
+        <span *ngIf="pendingRequestCount > 0" class="badge-count">{{ pendingRequestCount }}</span>
       </button>
 
       <button (click)="setTab(ADMIN_TABS.shifts)"
               [class.active]="isTab(ADMIN_TABS.shifts)">
-        Shift
+        <app-icon name="clock" [size]="16"></app-icon>
+        <span>Shifts</span>
       </button>
     </div>
 
-    <!-- ================= WATCHMEN ================= -->
+    <!-- ================= WATCHMEN TAB ================= -->
     <div *ngIf="isTab(ADMIN_TABS.watchmen)">
 
       <section class="card">
@@ -56,16 +67,29 @@
 
         <div class="actions">
           <button (click)="createWatchman()" class="btn-primary">
-            Create Watchman
+            <app-icon name="plus" [size]="16"></app-icon>
+            <span>Create Watchman</span>
           </button>
         </div>
       </section>
 
       <section class="card">
-        <h2>Watchmen</h2>
+        <div class="card-header-row">
+          <h2>All Watchmen</h2>
+          <div class="search-box">
+            <app-icon name="search" [size]="16"></app-icon>
+            <input class="search-input"
+                   [(ngModel)]="watchmenSearch"
+                   placeholder="Search watchmen..." />
+          </div>
+        </div>
 
-        <div class="grid-cards">
-          <div *ngFor="let w of watchmen" class="item-card">
+        <div *ngIf="filteredWatchmen.length === 0" class="empty">
+          {{ watchmenSearch ? 'No watchmen found matching your search.' : 'No watchmen found.' }}
+        </div>
+
+        <div class="grid-cards" *ngIf="filteredWatchmen.length > 0">
+          <div *ngFor="let w of filteredWatchmen" class="item-card">
             <div>
               <p class="title">{{ w.fullName }}</p>
               <p class="meta">Username: {{ w.username }}</p>
@@ -78,33 +102,53 @@
 
             <button *ngIf="w.isActive"
                     (click)="disableWatchman(w.id)"
-                    class="btn-danger">
-              Disable
+                    class="btn-danger btn-sm">
+              <app-icon name="x" [size]="14"></app-icon>
+              <span>Disable</span>
             </button>
 
             <button *ngIf="!w.isActive"
                     (click)="enableWatchman(w.id)"
-                    class="btn-secondary">
-              Enable
+                    class="btn-secondary btn-sm">
+              <app-icon name="check" [size]="14"></app-icon>
+              <span>Enable</span>
             </button>
           </div>
         </div>
       </section>
     </div>
 
-    <!-- ================= ATTENDANCE ================= -->
+    <!-- ================= ATTENDANCE TAB ================= -->
     <div *ngIf="isTab(ADMIN_TABS.attendance)">
       <section class="card">
-        <h2>Attendance Logs</h2>
-
-        <div class="actions" *ngIf="selectedAttendance.size > 0">
-          <button class="btn-danger" (click)="bulkDelete()">
-            Delete Selected ({{ selectedAttendance.size }})
-          </button>
+        <div class="card-header-row">
+          <h2>Attendance Logs</h2>
+          <div class="header-actions">
+            <div class="search-box">
+              <app-icon name="search" [size]="16"></app-icon>
+              <input class="search-input"
+                     [(ngModel)]="attendanceSearch"
+                     placeholder="Search by name..." />
+            </div>
+            <button class="btn-secondary btn-sm" (click)="loadAttendance()">
+              <app-icon name="refresh" [size]="14"></app-icon>
+              <span>Refresh</span>
+            </button>
+            <button *ngIf="selectedAttendance.size > 0"
+                    class="btn-danger btn-sm"
+                    (click)="bulkDelete()">
+              <app-icon name="trash" [size]="14"></app-icon>
+              <span>Delete ({{ selectedAttendance.size }})</span>
+            </button>
+          </div>
         </div>
 
-        <div class="attendance-list">
-          <div *ngFor="let a of attendance" class="attendance-item">
+        <div *ngIf="filteredAttendance.length === 0" class="empty">
+          {{ attendanceSearch ? 'No records matching your search.' : 'No attendance records found.' }}
+        </div>
+
+        <div class="attendance-list" *ngIf="filteredAttendance.length > 0">
+          <div *ngFor="let a of filteredAttendance" class="attendance-item">
 
             <div class="attendance-left">
               <input type="checkbox"
@@ -113,13 +157,14 @@
 
               <div class="attendance-info">
                 <strong>{{ a.fullName }}</strong>
-                <span>{{ a.createdAt | date:'medium' }}</span>
+                <span class="meta">{{ a.createdAt | date:'medium' }}</span>
 
                 <a class="link"
                    [routerLink]="['/map']"
                    [queryParams]="{ lat: a.latitude, lng: a.longitude }"
                    target="_blank">
-                  View Location
+                  <app-icon name="map" [size]="12"></app-icon>
+                  <span>View on Map</span>
                 </a>
               </div>
             </div>
@@ -129,9 +174,9 @@
                    [src]="apiUrl + '/api/files/' + a.photoPath.split('/').pop()"
                    class="attendance-photo" />
 
-              <button class="btn-danger"
+              <button class="btn-danger btn-sm"
                       (click)="deleteAttendance(a.id)">
-                Delete
+                <app-icon name="trash" [size]="14"></app-icon>
               </button>
             </div>
 
@@ -140,19 +185,30 @@
       </section>
     </div>
 
-    <!-- ================= QR ================= -->
+    <!-- ================= QR TAB ================= -->
     <div *ngIf="isTab(ADMIN_TABS.qr)">
       <section class="card">
         <h2>Create QR Location</h2>
 
         <div class="form-grid two">
           <input class="input" [(ngModel)]="qr.locationName" placeholder="Location Name" />
-          <input class="input" [(ngModel)]="qr.radius" placeholder="Radius (meters)" />
-          <input class="input" [(ngModel)]="qr.latitude" placeholder="Latitude" />
-          <input class="input" [(ngModel)]="qr.longitude" placeholder="Longitude" />
+          <input class="input" [(ngModel)]="qr.radius" type="number" placeholder="Radius (meters)" />
+          <input class="input" [(ngModel)]="qr.latitude" type="number" placeholder="Latitude" />
+          <input class="input" [(ngModel)]="qr.longitude" type="number" placeholder="Longitude" />
         </div>
 
-        <div class="form-actions">
+        <div class="location-buttons">
+          <button type="button" class="btn-secondary" (click)="autoFetchLocation()" [disabled]="locationFetching">
+            <app-icon [name]="locationFetching ? 'spinner' : 'crosshair'" [size]="16"></app-icon>
+            <span>{{ locationFetching ? 'Fetching...' : 'Auto Fetch Location' }}</span>
+          </button>
+          <button type="button" class="btn-secondary" (click)="openMapPicker()">
+            <app-icon name="map" [size]="16"></app-icon>
+            <span>Select on Map</span>
+          </button>
+        </div>
+
+        <div class="actions">
           <button (click)="createQr()"
                   [disabled]="qrLoading"
                   class="btn-primary">
@@ -164,13 +220,17 @@
       <section class="card">
         <h2>QR Locations</h2>
 
-        <div class="grid-cards">
-          <div *ngFor="let q of qrLocations" class="item-card qr-card">
+        <div *ngIf="qrLocations.length === 0" class="empty">
+          No QR locations created yet.
+        </div>
+
+        <div class="grid-cards" *ngIf="qrLocations.length > 0">
+          <div *ngFor="let q of qrLocations" class="item-card qr-card-wrapper">
             <div class="qr-card">
               <div class="qr-header">
                 <div>
                   <p class="qr-title">{{ q.locationName }}</p>
-                  <p class="qr-coords">{{ q.latitude }}, {{ q.longitude }}</p>
+                  <p class="qr-coords">{{ q.latitude }}, {{ q.longitude }} &middot; {{ q.radius }}m radius</p>
                 </div>
               </div>
 
@@ -188,8 +248,8 @@
                 </button>
               </div>
 
-              <div class="qr-preview" *ngIf="showQrFor === q.id">
-                <img [src]="qrImageMap[q.id]" />
+              <div class="qr-preview" *ngIf="showQrFor === q.id && qrImageMap[q.id]">
+                <img [src]="qrImageMap[q.id]" alt="QR Code" />
               </div>
             </div>
           </div>
@@ -197,12 +257,16 @@
       </section>
     </div>
 
-    <!-- ================= AUDIT ================= -->
+    <!-- ================= AUDIT TAB ================= -->
     <div *ngIf="isTab(ADMIN_TABS.audit)">
       <section class="card">
         <h2>Admin Audit Logs</h2>
 
-        <div class="audit-table">
+        <div *ngIf="auditLogs.length === 0" class="empty">
+          No audit logs found.
+        </div>
+
+        <div class="audit-table" *ngIf="auditLogs.length > 0">
           <div class="audit-header">
             <span>Admin</span>
             <span>Action</span>
@@ -211,109 +275,188 @@
           </div>
 
           <div class="audit-row" *ngFor="let log of auditLogs">
-            <span class="admin">{{ log.adminName }}</span>
-            <span class="action">{{ log.action }}</span>
-            <span class="table">{{ log.tableName }}</span>
-            <span class="time">{{ log.performedAt | date:'medium' }}</span>
+            <span class="admin-name">{{ log.adminName }}</span>
+            <span class="action-name">{{ log.action }}</span>
+            <span class="table-name">{{ log.tableName }}</span>
+            <span class="time-name">{{ log.performedAt | date:'medium' }}</span>
           </div>
         </div>
       </section>
     </div>
 
-
+    <!-- ================= REQUESTS TAB ================= -->
     <div *ngIf="isTab(ADMIN_TABS.requests)">
       <section class="card">
-        <h2>Pending Attendance Requests</h2>
+        <h2>Attendance Requests</h2>
 
-        <div *ngIf="loading">Loading...</div>
+        <div *ngIf="loading" class="empty">Loading...</div>
 
         <div *ngIf="!loading && requests.length === 0" class="empty">
-          No pending requests
+          No pending requests.
         </div>
 
-        <table *ngIf="requests.length > 0" class="table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Type</th>
-              <th>Reason</th>
-              <th>Expected Time</th>
-              <th>Action</th>
-            </tr>
-          </thead>
+        <div class="table-wrapper" *ngIf="!loading && requests.length > 0">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Reason</th>
+                <th>Expected Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
 
-          <tbody>
-            <tr *ngFor="let r of requests">
-              <td>{{ r.attendanceDate | date }}</td>
-              <td>{{ r.type }}</td>
-              <td>{{ r.reason }}</td>
-              <td>{{ r.expectedTime || '-' }}</td>
-              <td>
-                <button class="btn-success" (click)="approve(r.id)">
-                  Approve
-                </button>
-                <button class="btn-danger" (click)="reject(r.id)">
-                  Reject
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
+            <tbody>
+              <tr *ngFor="let r of requests">
+                <td>{{ r.attendanceDate | date }}</td>
+                <td>
+                  <span class="badge" [ngClass]="{late: r.type === 'LateArrival', halfday: r.type === 'HalfDay'}">
+                    {{ r.type }}
+                  </span>
+                </td>
+                <td>{{ r.reason }}</td>
+                <td>{{ r.expectedTime || '-' }}</td>
+                <td>
+                  <span class="badge"
+                        [ngClass]="{pending: r.status === 'Pending', approved: r.status === 'Approved', rejected: r.status === 'Rejected'}">
+                    {{ r.status }}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-btns" *ngIf="r.status === 'Pending'">
+                    <button class="btn-success btn-sm" (click)="approve(r.id)">
+                      Approve
+                    </button>
+                    <button class="btn-danger btn-sm" (click)="reject(r.id)">
+                      Reject
+                    </button>
+                  </div>
+                  <span *ngIf="r.status !== 'Pending'" class="meta">-</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
-
     </div>
 
-    <!-- ================= SHIFTS ================= -->
+    <!-- ================= SHIFTS TAB ================= -->
     <div *ngIf="isTab(ADMIN_TABS.shifts)">
       <section class="card">
         <h2>Assign Shift</h2>
 
-        <select [(ngModel)]="shiftForm.watchmanId">
-          <option value="">Select Watchman</option>
-          <option *ngFor="let w of watchmen" [value]="w.id">
-            {{ w.fullName }}
-          </option>
-        </select>
+        <div class="form-grid two">
+          <div class="form-group">
+            <label class="form-label">Watchman</label>
+            <select class="input" [(ngModel)]="shiftForm.watchmanId">
+              <option value="">Select Watchman</option>
+              <option *ngFor="let w of watchmen" [value]="w.id">
+                {{ w.fullName }}
+              </option>
+            </select>
+          </div>
 
-        <input type="time" [(ngModel)]="shiftForm.entryTime" />
-        <input type="time" [(ngModel)]="shiftForm.exitTime" />
+          <div class="form-group">
+            <label class="form-label">Entry Time</label>
+            <input class="input" type="time" [(ngModel)]="shiftForm.entryTime" />
+          </div>
 
-        <input type="number" [(ngModel)]="shiftForm.graceMinutes" placeholder="Grace Minutes" />
-        <input type="number" [(ngModel)]="shiftForm.halfDayAfterMinutes" placeholder="Half Day After Minutes" />
+          <div class="form-group">
+            <label class="form-label">Exit Time</label>
+            <input class="input" type="time" [(ngModel)]="shiftForm.exitTime" />
+          </div>
 
-        <button class="btn-primary" (click)="assignShift()">
-          Assign Shift
-        </button>
+          <div class="form-group">
+            <label class="form-label">Grace Minutes</label>
+            <input class="input" type="number" [(ngModel)]="shiftForm.graceMinutes" placeholder="5" />
+          </div>
 
+          <div class="form-group">
+            <label class="form-label">Half-Day After Minutes</label>
+            <input class="input" type="number" [(ngModel)]="shiftForm.halfDayAfterMinutes" placeholder="120" />
+          </div>
+        </div>
 
-        
+        <div class="actions">
+          <button class="btn-primary" (click)="assignShift()">
+            Assign Shift
+          </button>
+        </div>
+      </section>
 
-        </section>
+      <section class="card">
+        <h2>Assigned Shifts</h2>
 
-        <section class="card">
-          <h3>Assigned Shifts</h3>
+        <div *ngIf="shifts.length === 0" class="empty">
+          No shifts assigned yet.
+        </div>
 
-          <table class="table" *ngIf="shifts.length > 0">
-            <tr>
-              <th>Watchman</th>
-              <th>Entry</th>
-              <th>Exit</th>
-              <th>Grace</th>
-              <th>HalfDay</th>
-            </tr>
-
-            <tr *ngFor="let s of shifts">
-              <td>{{ s.FullName }}</td>
-              <td>{{ s.EntryTime }}</td>
-              <td>{{ s.ExitTime }}</td>
-              <td>{{ s.GraceMinutes }} min</td>
-              <td>{{ s.HalfDayAfterMinutes }} min</td>
-            </tr>
+        <div class="table-wrapper" *ngIf="shifts.length > 0">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Watchman</th>
+                <th>Entry</th>
+                <th>Exit</th>
+                <th>Grace</th>
+                <th>Half-Day After</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of shifts">
+                <td>{{ s.FullName || s.fullName }}</td>
+                <td>{{ s.EntryTime || s.entryTime }}</td>
+                <td>{{ s.ExitTime || s.exitTime }}</td>
+                <td>{{ s.GraceMinutes || s.graceMinutes }} min</td>
+                <td>{{ s.HalfDayAfterMinutes || s.halfDayAfterMinutes }} min</td>
+              </tr>
+            </tbody>
           </table>
+        </div>
+      </section>
+    </div>
 
-        </section>
+  </div>
 </div>
 
+<!-- Map Picker Modal -->
+<div class="map-picker-overlay" *ngIf="showMapPicker" (click)="closeMapPicker()">
+  <div class="map-picker-modal" (click)="$event.stopPropagation()">
+    <div class="map-picker-header">
+      <h3>Select Location on Map</h3>
+      <button class="close-btn" (click)="closeMapPicker()">&times;</button>
+    </div>
+    <div class="map-picker-info">
+      <div class="map-picker-coords">
+        <app-icon name="location" [size]="16"></app-icon>
+        <span *ngIf="qr.latitude && qr.longitude">{{ qr.latitude }}, {{ qr.longitude }}</span>
+        <span *ngIf="!qr.latitude || !qr.longitude">Click on the map to select a location</span>
+      </div>
+      <button class="my-location-btn" (click)="goToMyLocation()" [disabled]="locationFetching">
+        <app-icon [name]="locationFetching ? 'spinner' : 'crosshair'" [size]="14"></app-icon>
+        <span>My Location</span>
+      </button>
+    </div>
+    <div class="map-picker-radius-control">
+      <label>Radius: <strong>{{ qr.radius || 50 }}m</strong></label>
+      <input type="range"
+             [ngModel]="qr.radius || 50"
+             (ngModelChange)="onRadiusChange($event)"
+             min="10" max="500" step="10"
+             class="radius-slider" />
+      <div class="radius-presets">
+        <button type="button" (click)="onRadiusChange(25)" [class.active]="qr.radius === 25">25m</button>
+        <button type="button" (click)="onRadiusChange(50)" [class.active]="qr.radius === 50">50m</button>
+        <button type="button" (click)="onRadiusChange(100)" [class.active]="qr.radius === 100">100m</button>
+        <button type="button" (click)="onRadiusChange(200)" [class.active]="qr.radius === 200">200m</button>
+      </div>
+    </div>
+    <div id="location-picker-map" class="map-picker-map"></div>
+    <div class="map-picker-actions">
+      <button class="btn-secondary" (click)="closeMapPicker()">Cancel</button>
+      <button class="btn-primary" (click)="confirmMapLocation()">Confirm Location</button>
+    </div>
   </div>
 </div>

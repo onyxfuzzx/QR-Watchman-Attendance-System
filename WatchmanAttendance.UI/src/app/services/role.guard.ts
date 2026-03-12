@@ -11,7 +11,7 @@ export const roleGuard: CanActivateFn = (route, state) => {
 
   if (userRole !== expectedRole) {
     router.navigate(
-      ['/watchman/login'],
+      ['/login'],
       { queryParams: { redirect: state.url } }
     );
     return false;

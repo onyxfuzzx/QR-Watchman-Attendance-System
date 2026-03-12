@@ -1,14 +1,16 @@
-  
 
-import { Component, OnInit } from '@angular/core';
+
+import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
+declare const google: any;
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../services/api.service';
 import { APP_CONFIG } from '../config/app-config';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { AttendanceLog } from '../models/attendance.model';
 import { AuditLog } from '../models/audit-log.model';
-import qrcode from 'qrcode';
+import { IconComponent } from '../shared/icon.component';
 
 interface AttendanceRequest {
   id: string;
@@ -35,16 +37,23 @@ type AdminTab = typeof ADMIN_TABS[keyof typeof ADMIN_TABS];
 @Component({
   standalone: true,
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, IconComponent],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.css']
 })
 
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   apiUrl = APP_CONFIG.baseUrl;
   baseScanUrl = location.origin;
   ADMIN_TABS = ADMIN_TABS;
+
+  // Map picker state
+  showMapPicker = false;
+  locationFetching = false;
+  pickerMap: any = null;
+  pickerMarker: any = null;
+  pickerCircle: any = null;
 
   // Create watchman
   wm = {
@@ -68,6 +77,11 @@ export class AdminDashboardComponent implements OnInit {
   qrLocations: any[] = [];
   attendance: AttendanceLog[] = [];
   watchmen: any[] = [];
+
+  // Search filters
+  watchmenSearch = '';
+  attendanceSearch = '';
+
   qrLoading = false;
   auditLogs: AuditLog[] = [];
   isTab(tab: AdminTab): boolean {
@@ -78,7 +92,29 @@ export class AdminDashboardComponent implements OnInit {
   selectedAttendance = new Set<string>();
   loading = false;
   requests: AttendanceRequest[] = [];
-  constructor(private api: ApiService) { }
+
+  get pendingRequestCount(): number {
+    return this.requests.filter(r => r.status === 'Pending').length;
+  }
+
+  get filteredWatchmen(): any[] {
+    if (!this.watchmenSearch.trim()) return this.watchmen;
+    const search = this.watchmenSearch.toLowerCase();
+    return this.watchmen.filter(w =>
+      w.fullName?.toLowerCase().includes(search) ||
+      w.username?.toLowerCase().includes(search)
+    );
+  }
+
+  get filteredAttendance(): AttendanceLog[] {
+    if (!this.attendanceSearch.trim()) return this.attendance;
+    const search = this.attendanceSearch.toLowerCase();
+    return this.attendance.filter(a =>
+      a.fullName?.toLowerCase().includes(search)
+    );
+  }
+
+  constructor(private api: ApiService, private router: Router) { }
   shiftForm = {
     watchmanId: '',
     entryTime: '',
@@ -91,6 +127,187 @@ export class AdminDashboardComponent implements OnInit {
     this.loadQrLocations();
     this.loadWatchmen();
     this.loadRequests();
+  }
+
+  ngAfterViewInit(): void {
+    // Map picker is initialized when opened
+  }
+
+  ngOnDestroy(): void {
+    if (this.pickerMap) {
+      this.pickerMap = null;
+    }
+  }
+
+  // =======================
+  // LOCATION METHODS
+  // =======================
+
+  autoFetchLocation(): void {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser');
+      return;
+    }
+
+    this.locationFetching = true;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        this.qr.latitude = parseFloat(position.coords.latitude.toFixed(6));
+        this.qr.longitude = parseFloat(position.coords.longitude.toFixed(6));
+        this.locationFetching = false;
+      },
+      (error) => {
+        this.locationFetching = false;
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            alert('Location permission denied. Please allow location access.');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            alert('Location information unavailable.');
+            break;
+          case error.TIMEOUT:
+            alert('Location request timed out.');
+            break;
+          default:
+            alert('Failed to get location.');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }
+
+  openMapPicker(): void {
+    this.showMapPicker = true;
+    setTimeout(() => this.initMapPicker(), 100);
+  }
+
+  closeMapPicker(): void {
+    this.showMapPicker = false;
+  }
+
+  initMapPicker(): void {
+    const mapEl = document.getElementById('location-picker-map');
+    if (!mapEl) return;
+
+    const defaultCenter = { lat: this.qr.latitude || 20.5937, lng: this.qr.longitude || 78.9629 };
+
+    this.pickerMap = new google.maps.Map(mapEl, {
+      center: defaultCenter,
+      zoom: this.qr.latitude ? 16 : 5,
+      mapTypeId: 'roadmap',
+      styles: [
+        { elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
+        { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a2e' }] },
+        { elementType: 'labels.text.fill', stylers: [{ color: '#8b8b8b' }] },
+        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2d2d44' }] },
+        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0e0e1a' }] }
+      ]
+    });
+
+    if (this.qr.latitude && this.qr.longitude) {
+      this.placePickerMarker({ lat: this.qr.latitude, lng: this.qr.longitude });
+    }
+
+    this.pickerMap.addListener('click', (e: any) => {
+      const lat = parseFloat(e.latLng.lat().toFixed(6));
+      const lng = parseFloat(e.latLng.lng().toFixed(6));
+      this.qr.latitude = lat;
+      this.qr.longitude = lng;
+      this.placePickerMarker({ lat, lng });
+    });
+  }
+
+  placePickerMarker(position: { lat: number; lng: number }): void {
+    if (this.pickerMarker) {
+      this.pickerMarker.setPosition(position);
+    } else {
+      this.pickerMarker = new google.maps.Marker({
+        position,
+        map: this.pickerMap,
+        draggable: true
+      });
+
+      this.pickerMarker.addListener('dragend', () => {
+        const pos = this.pickerMarker.getPosition();
+        this.qr.latitude = parseFloat(pos.lat().toFixed(6));
+        this.qr.longitude = parseFloat(pos.lng().toFixed(6));
+        this.updatePickerCircle();
+      });
+    }
+
+    this.updatePickerCircle();
+  }
+
+  updatePickerCircle(): void {
+    const radius = this.qr.radius || 50;
+    const center = { lat: this.qr.latitude!, lng: this.qr.longitude! };
+
+    if (this.pickerCircle) {
+      this.pickerCircle.setCenter(center);
+      this.pickerCircle.setRadius(radius);
+    } else {
+      this.pickerCircle = new google.maps.Circle({
+        map: this.pickerMap,
+        center,
+        radius,
+        strokeColor: '#10b981',
+        strokeOpacity: 0.9,
+        strokeWeight: 2,
+        fillColor: '#10b981',
+        fillOpacity: 0.2
+      });
+    }
+
+    // Fit map bounds to show the full circle
+    if (this.pickerCircle && this.pickerMap) {
+      this.pickerMap.fitBounds(this.pickerCircle.getBounds());
+    }
+  }
+
+  onRadiusChange(radius: number): void {
+    this.qr.radius = radius;
+    if (this.pickerCircle && this.qr.latitude && this.qr.longitude) {
+      this.updatePickerCircle();
+    }
+  }
+
+  confirmMapLocation(): void {
+    if (!this.qr.latitude || !this.qr.longitude) {
+      alert('Please click on the map to select a location');
+      return;
+    }
+    this.closeMapPicker();
+  }
+
+  goToMyLocation(): void {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser');
+      return;
+    }
+
+    this.locationFetching = true;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = parseFloat(position.coords.latitude.toFixed(6));
+        const lng = parseFloat(position.coords.longitude.toFixed(6));
+        this.qr.latitude = lat;
+        this.qr.longitude = lng;
+
+        if (this.pickerMap) {
+          const pos = { lat, lng };
+          this.pickerMap.setCenter(pos);
+          this.pickerMap.setZoom(17);
+          this.placePickerMarker(pos);
+        }
+
+        this.locationFetching = false;
+      },
+      (error) => {
+        this.locationFetching = false;
+        alert('Failed to get your location. Please allow location access.');
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   }
 
   // =======================
@@ -172,7 +389,7 @@ export class AdminDashboardComponent implements OnInit {
 
   logout() {
     localStorage.clear();
-    location.href = '/admin/login';
+    this.router.navigate(['/login']);
   }
 
   setTab(tab: AdminTab) {
@@ -234,7 +451,7 @@ export class AdminDashboardComponent implements OnInit {
       alert('QR created');
       this.loadQrLocations();
     });
-  
+
   }
 
 
@@ -320,7 +537,7 @@ bulkDelete() {
 
 
 
-  
+
 
 
 

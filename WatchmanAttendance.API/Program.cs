@@ -101,7 +101,13 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins("http://localhost:4200", "https://guard.abacusx.com")
+                .WithOrigins(
+                    "http://localhost:4200",
+                    "https://localhost:4200",
+                    "http://localhost:5240",
+                    "https://localhost:7098",
+                    "https://guard.abacusx.com"
+                )
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();

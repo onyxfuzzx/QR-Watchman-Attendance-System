@@ -1,4 +1,4 @@
 export const APP_CONFIG = {
-  apiUrl: 'https://watchmanattendanceap-aqb2ezgje8g2bxfy.canadacentral-01.azurewebsites.net/api',
-  baseUrl: 'https://watchmanattendanceap-aqb2ezgje8g2bxfy.canadacentral-01.azurewebsites.net'
+  apiUrl: 'http://localhost:5036/api',
+  baseUrl: 'http://localhost:5036'
 } as const;

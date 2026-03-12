@@ -30,11 +30,7 @@
       <!-- FACE STATUS -->
       <p class="face-status"
          [class.detected]="faceDetected">
-        {{
- faceDetected
-          ? 'Face detected ✔'
-          : 'Position your face inside the circle'
-        }}
+        {{ faceDetected ? 'Face detected' : 'Position your face inside the circle' }}
       </p>
 
       <!-- ACTION -->
@@ -55,7 +51,12 @@
     <!-- ================= AFTER SUCCESS ================= -->
     <ng-container *ngIf="success">
       <div class="success-box">
-        <div class="success-icon">✅</div>
+        <div class="success-icon">
+          <svg viewBox="0 0 56 56" class="success-svg" aria-hidden="true">
+            <circle class="success-circle" cx="28" cy="28" r="24" />
+            <path class="success-check" d="M16 29l8 8 16-16" />
+          </svg>
+        </div>
         <h3 class="success-title">Attendance Recorded</h3>
         <p class="success-text">
           You may now close this page

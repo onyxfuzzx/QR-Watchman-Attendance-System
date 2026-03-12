@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { FormsModule } from '@angular/forms'
+import { Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { IconComponent } from '../shared/icon.component';
 
 interface AttendanceItem {
   date: string;
@@ -33,18 +34,56 @@ interface DashboardResponse {
   recentActivity: RecentActivityItem[];
 }
 
+type DashboardApiResponse = Partial<DashboardResponse> & {
+  WatchmanName?: string;
+  Summary?: {
+    Month?: string;
+    PresentDays?: number;
+    Percentage?: number;
+    LastPunch?: string | null;
+  };
+  Attendance?: Array<{
+    Date?: string;
+    PunchTime?: string;
+    Status?: 'Present' | 'Late' | 'HalfDay';
+    LocationVerified?: boolean;
+  }>;
+  RecentActivity?: Array<{
+    Time?: string;
+  }>;
+};
+
+type RawAttendanceItem = Partial<AttendanceItem> & {
+  Date?: string;
+  PunchTime?: string;
+  Status?: 'Present' | 'Late' | 'HalfDay';
+  LocationVerified?: boolean;
+};
+
+type RawRecentActivityItem = Partial<RecentActivityItem> & {
+  Time?: string;
+};
+
+type RawDashboardSummary = Partial<DashboardResponse['summary']> & {
+  Month?: string;
+  PresentDays?: number;
+  Percentage?: number;
+  LastPunch?: string | null;
+};
+
 @Component({
   standalone: true,
   selector: 'app-watchman-dashboard',
   templateUrl: './watchman-dashboard.component.html',
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, IconComponent],
   styleUrls: ['./watchman-dashboard.component.css']
 })
 export class WatchmanDashboardComponent implements OnInit {
   activeTab: 'overview' | 'requests' = 'overview';
   watchmanName = '';
   loading = false;
- 
+  error = '';
+
   loadingRequests = false;
   summary = {
     month: '',
@@ -60,7 +99,7 @@ export class WatchmanDashboardComponent implements OnInit {
   attendance: AttendanceItem[] = [];
   recentActivity: RecentActivityItem[] = [];
   requests: AttendanceRequest[] = [];
-  constructor(private api: ApiService) { }
+  constructor(private api: ApiService, private router: Router) { }
 
   ngOnInit(): void {
     this.loadDashboard();
@@ -68,16 +107,20 @@ export class WatchmanDashboardComponent implements OnInit {
 
   loadDashboard(): void {
     this.loading = true;
+    this.error = '';
 
     this.api.getWatchmanDashboard().subscribe({
-      next: (res: DashboardResponse) => {
-        this.watchmanName = res.watchmanName;
-        this.summary = res.summary;
-        this.attendance = res.attendance;
-        this.recentActivity = res.recentActivity;
+      next: (res: DashboardApiResponse) => {
+        const dashboard = this.normalizeDashboardResponse(res);
+
+        this.watchmanName = dashboard.watchmanName;
+        this.summary = dashboard.summary;
+        this.attendance = dashboard.attendance;
+        this.recentActivity = dashboard.recentActivity;
         this.loading = false;
       },
       error: () => {
+        this.error = 'Unable to load dashboard right now.';
         this.loading = false;
       }
     });
@@ -114,7 +157,7 @@ export class WatchmanDashboardComponent implements OnInit {
       alert('Late arrival request submitted');
     });
   }
-  
+
   switchTab(tab: 'overview' | 'requests') {
     this.activeTab = tab;
 
@@ -143,6 +186,31 @@ export class WatchmanDashboardComponent implements OnInit {
 
   logout(): void {
     localStorage.clear();
-    location.href = '/watchman/login';
+    this.router.navigate(['/login']);
+  }
+
+  private normalizeDashboardResponse(res: DashboardApiResponse): DashboardResponse {
+    const summary = (res.summary ?? res.Summary ?? {}) as RawDashboardSummary;
+    const attendance = (res.attendance ?? res.Attendance ?? []) as RawAttendanceItem[];
+    const recentActivity = (res.recentActivity ?? res.RecentActivity ?? []) as RawRecentActivityItem[];
+
+    return {
+      watchmanName: res.watchmanName ?? res.WatchmanName ?? 'Watchman',
+      summary: {
+        month: summary.month ?? summary.Month ?? '',
+        presentDays: summary.presentDays ?? summary.PresentDays ?? 0,
+        percentage: summary.percentage ?? summary.Percentage ?? 0,
+        lastPunch: summary.lastPunch ?? summary.LastPunch ?? null
+      },
+      attendance: attendance.map(item => ({
+        date: item.date ?? item.Date ?? '',
+        punchTime: item.punchTime ?? item.PunchTime ?? '',
+        status: item.status ?? item.Status ?? 'Present',
+        locationVerified: item.locationVerified ?? item.LocationVerified ?? false
+      })),
+      recentActivity: recentActivity.map(item => ({
+        time: item.time ?? item.Time ?? ''
+      }))
+    };
   }
 }

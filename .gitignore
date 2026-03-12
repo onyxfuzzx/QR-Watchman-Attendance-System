@@ -26,3 +26,10 @@ yarn-error.log*
 # Runtime / cache files
 *.cache
 *.log
+
+# Environment files
+.env
+.env.local
+
+# Misc
+GUIDE.pdf

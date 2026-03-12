@@ -9,6 +9,6 @@ public class AttendanceChangeRequest
     public string Reason { get; set; } = "";
     public string Type { get; set; } = "";   // Late / HalfDay
     public string Status { get; set; } = ""; // Pending / Approved / Rejected
-    public TimeSpan? ExpectedTime { get; set; } // ✅ NEW
+    public string? ExpectedTime { get; set; }
     public DateTime CreatedAt { get; set; }
 }

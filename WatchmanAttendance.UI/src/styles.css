@@ -7,6 +7,16 @@
   body {
     @apply bg-slate-50 text-gray-900 font-sans antialiased;
   }
+
+  /* Touch-friendly tap targets for mobile */
+  button, input[type="button"], input[type="submit"] {
+    @apply min-h-[44px];
+  }
+
+  input[type="text"], input[type="email"], input[type="password"],
+  input[type="number"], select, textarea {
+    @apply min-h-[44px];
+  }
 }
 
 /* ================= COMPONENTS ================= */
@@ -28,23 +38,28 @@
   /* ---------- BUTTONS ---------- */
 
   .btn-primary {
-    @apply bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition;
+    @apply bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg
+           text-sm font-medium transition inline-flex items-center justify-center sm:justify-start gap-2 w-full sm:w-auto;
   }
 
   .btn-secondary {
-    @apply bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2.5 rounded-lg text-sm font-medium transition;
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 sm:py-2.5 rounded-lg
+           text-sm font-medium transition inline-flex items-center justify-center sm:justify-start gap-2 w-full sm:w-auto;
   }
 
   .btn-danger {
-    @apply bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition;
+    @apply bg-red-500 hover:bg-red-600 text-white px-4 py-2 sm:py-2.5 rounded-lg
+           text-sm font-medium transition inline-flex items-center justify-center sm:justify-start gap-2 w-full sm:w-auto;
   }
 
   .btn-success {
-    @apply bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition;
+    @apply bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 sm:py-2.5 rounded-lg
+           text-sm font-medium transition inline-flex items-center justify-center sm:justify-start gap-2 w-full sm:w-auto;
   }
 
   .btn-warning {
-    @apply bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition;
+    @apply bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 sm:py-2.5 rounded-lg
+           text-sm font-medium transition inline-flex items-center justify-center sm:justify-start gap-2 w-full sm:w-auto;
   }
 
   .btn-link {
@@ -54,7 +69,7 @@
   /* ---------- BADGES ---------- */
 
   .badge {
-    @apply px-3 py-1 rounded-full text-xs font-medium inline-flex items-center;
+    @apply px-2 sm:px-3 py-1 rounded-full text-xs font-medium inline-flex items-center;
   }
 
     .badge.present,
@@ -97,17 +112,17 @@
   }
 
     .table th {
-      @apply text-left font-medium px-4 py-3 bg-gray-100;
+      @apply text-left font-medium px-3 sm:px-4 py-2 sm:py-3 bg-gray-100 text-xs sm:text-sm;
     }
 
     .table td {
-      @apply px-4 py-3 border-b border-gray-200;
+      @apply px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200 text-xs sm:text-sm;
     }
 
   /* ---------- CARDS ---------- */
 
   .card {
-    @apply bg-white rounded-2xl border border-gray-200 p-6 shadow-sm;
+    @apply bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6 shadow-sm;
   }
 
   /* ---------- TABS ---------- */
@@ -117,7 +132,7 @@
   }
 
     .tabs button {
-      @apply px-4 py-2 rounded-lg border border-gray-200 bg-white text-sm font-medium transition;
+      @apply px-3 sm:px-4 py-2 rounded-lg border border-gray-200 bg-white text-xs sm:text-sm font-medium transition;
     }
 
       .tabs button.active {

@@ -51,7 +51,7 @@ namespace WatchmanAttendance.API.Controllers
                 AttendanceDate = localAttendanceDate,
                 Type = req.Type,
                 Reason = req.Reason,
-                ExpectedTime = expectedTime
+                ExpectedTime = expectedTime?.ToString(@"hh\:mm")
             });
 
             return Ok(new { meaage = "Request submitted" });

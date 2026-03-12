@@ -5,88 +5,150 @@
 }
 
 .container {
-  @apply max-w-7xl mx-auto px-6 py-10;
+  @apply max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:py-10;
 }
 
 /* ================= HEADER ================= */
 
 .header {
-  @apply flex items-center justify-between mb-8;
+  @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8;
 }
 
 .header h1 {
-  @apply text-2xl font-semibold text-gray-900;
+  @apply text-xl sm:text-2xl font-semibold text-gray-900;
+}
+
+.header-subtitle {
+  @apply text-sm text-gray-500 mt-1;
 }
 
 /* ================= TABS ================= */
 
 .tabs {
-  @apply flex flex-wrap gap-2 mb-8;
+  @apply flex gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tabs button {
-  @apply px-4 py-2 rounded-lg border border-gray-200 bg-white
-         text-sm font-medium transition;
+  @apply px-3 py-2 sm:px-4 rounded-lg border border-gray-200 bg-white
+         text-xs sm:text-sm font-medium transition whitespace-nowrap
+         flex items-center gap-1.5 sm:gap-2 flex-shrink-0;
+}
+
+.tabs button:hover {
+  @apply bg-gray-50;
 }
 
 .tabs button.active {
   @apply bg-gray-900 text-white border-gray-900;
 }
 
+.badge-count {
+  @apply ml-1 px-1.5 py-0.5 text-xs font-semibold
+         bg-red-500 text-white rounded-full
+         min-w-[18px] text-center;
+}
+
+.tabs button.active .badge-count {
+  @apply bg-white text-gray-900;
+}
+
 /* ================= CARDS ================= */
 
 .card {
-  @apply bg-white rounded-2xl border border-gray-200 p-6 mb-8;
+  @apply bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8 shadow-sm;
 }
 
 .card h2 {
-  @apply text-lg font-semibold mb-4;
+  @apply text-base sm:text-lg font-semibold mb-3 sm:mb-4;
 }
 
 .card h3 {
-  @apply text-base font-semibold mb-3;
+  @apply text-sm sm:text-base font-semibold mb-2 sm:mb-3;
+}
+
+.card-header-row {
+  @apply flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4;
+}
+
+.card-header-row h2 {
+  @apply mb-0;
+}
+
+/* ================= SEARCH BOX ================= */
+
+.search-box {
+  @apply flex items-center gap-2 px-3 py-2
+         bg-gray-100 border border-gray-200 rounded-lg
+         text-gray-500 w-full sm:w-auto;
+}
+
+.search-input {
+  @apply bg-transparent border-none outline-none text-sm text-gray-700
+         flex-1 sm:w-56 min-w-0;
+}
+
+.search-input::placeholder {
+  @apply text-gray-400;
+}
+
+.header-actions {
+  @apply flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3;
 }
 
 /* ================= FORMS ================= */
 
 .form-grid {
-  @apply grid gap-4;
+  @apply grid gap-3 sm:gap-4;
 }
 
 .form-grid.two {
-  @apply grid-cols-1 md:grid-cols-2;
+  @apply grid-cols-1 sm:grid-cols-2;
 }
 
 .form-grid.three {
-  @apply grid-cols-1 md:grid-cols-3;
+  @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.form-group {
+  @apply flex flex-col gap-1;
+}
+
+.form-label {
+  @apply text-sm font-medium text-gray-700;
 }
 
 .actions,
 .form-actions {
-  @apply mt-4 flex justify-end gap-3;
+  @apply mt-4 flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-3;
 }
 
 /* ================= WATCHMEN CARDS ================= */
 
 .grid-cards {
-  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  @apply grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6;
 }
 
 .item-card {
-  @apply border border-gray-200 rounded-xl p-4
-         flex justify-between items-center bg-white;
+  @apply border border-gray-200 rounded-xl p-3 sm:p-4
+         flex justify-between items-center bg-white shadow-sm;
 }
 
 .title {
-  @apply font-medium text-gray-900;
+  @apply font-medium text-gray-900 text-sm sm:text-base;
 }
 
 .meta {
-  @apply text-sm text-gray-500;
+  @apply text-xs sm:text-sm text-gray-500;
 }
 
 .status {
-  @apply text-sm font-medium mt-1;
+  @apply text-xs sm:text-sm font-medium mt-1;
 }
 
 .status.active {
@@ -100,57 +162,74 @@
 /* ================= ATTENDANCE ================= */
 
 .attendance-list {
-  @apply flex flex-col gap-4;
+  @apply flex flex-col gap-3 sm:gap-4;
 }
 
 .attendance-item {
-  @apply flex justify-between items-center
-         p-4 rounded-xl border border-gray-200 bg-white;
+  @apply flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4
+         p-3 sm:p-4 rounded-xl border border-gray-200 bg-white;
 }
 
 .attendance-left {
-  @apply flex items-center gap-4;
+  @apply flex items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto;
 }
 
 .attendance-info {
-  @apply flex flex-col gap-1;
+  @apply flex flex-col gap-0.5 sm:gap-1 min-w-0 flex-1;
 }
 
 .attendance-right {
-  @apply flex items-center gap-3;
+  @apply flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end;
 }
 
 .attendance-photo {
-  @apply w-36 rounded-xl border border-gray-200 object-cover;
+  @apply w-20 sm:w-36 rounded-lg sm:rounded-xl border border-gray-200 object-cover flex-shrink-0;
+}
+
+.link {
+  @apply text-emerald-600 hover:underline text-xs sm:text-sm font-medium
+         inline-flex items-center gap-1;
 }
 
 /* ================= TABLE ================= */
 
+.table-wrapper {
+  @apply overflow-x-auto -mx-4 sm:mx-0;
+}
+
 .table {
-  @apply w-full text-sm border-collapse;
+  @apply w-full text-xs sm:text-sm border-collapse min-w-[500px] sm:min-w-0;
 }
 
 .table th {
-  @apply text-left font-medium px-4 py-3 bg-gray-100;
+  @apply text-left font-medium px-3 sm:px-4 py-2 sm:py-3 bg-gray-100 text-gray-600 whitespace-nowrap;
 }
 
 .table td {
-  @apply px-4 py-3 border-b border-gray-200;
+  @apply px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200;
 }
 
 .empty {
   @apply text-center text-sm text-gray-500 py-6;
 }
 
+.action-btns {
+  @apply flex gap-1.5 sm:gap-2;
+}
+
 /* ================= QR ================= */
 
+.qr-card-wrapper {
+  @apply flex flex-col;
+}
+
 .qr-card {
-  @apply bg-white border border-gray-200 rounded-xl p-4
-         flex flex-col gap-3;
+  @apply bg-white border border-gray-200 rounded-xl p-3 sm:p-4
+         flex flex-col gap-2 sm:gap-3;
 }
 
 .qr-title {
-  @apply font-medium text-gray-900;
+  @apply font-medium text-gray-900 text-sm sm:text-base;
 }
 
 .qr-coords {
@@ -158,35 +237,36 @@
 }
 
 .qr-link {
-  @apply h-9 px-3 text-xs rounded-lg border
-         border-gray-200 bg-gray-50;
+  @apply h-8 sm:h-9 px-2 sm:px-3 text-xs rounded-lg border
+         border-gray-200 bg-gray-50 w-full;
 }
 
 .qr-actions {
-  @apply flex gap-2;
+  @apply flex flex-wrap gap-2;
 }
 
 .qr-preview {
-  @apply border-t border-gray-200 pt-4 flex justify-center;
+  @apply border-t border-gray-200 pt-3 sm:pt-4 flex justify-center;
 }
 
 .qr-preview img {
-  @apply w-44 h-44 object-contain;
+  @apply w-32 sm:w-44 h-32 sm:h-44 object-contain;
 }
 
 /* ================= AUDIT ================= */
 
 .audit-table {
-  @apply flex flex-col gap-3;
+  @apply flex flex-col gap-2 sm:gap-3;
 }
 
 .audit-header {
-  @apply grid grid-cols-4 px-4 py-3 rounded-lg
-         bg-gray-100 font-medium;
+  @apply hidden sm:grid sm:grid-cols-4 px-4 py-3 rounded-lg
+         bg-gray-100 font-medium text-sm text-gray-600;
 }
 
 .audit-row {
-  @apply grid grid-cols-4 px-4 py-3 rounded-lg
+  @apply flex flex-col sm:grid sm:grid-cols-4 gap-1 sm:gap-0
+         px-3 sm:px-4 py-3 rounded-lg
          border border-gray-200 bg-white;
 }
 
@@ -194,30 +274,163 @@
   @apply bg-gray-50;
 }
 
-.admin {
-  @apply font-medium;
+.admin-name {
+  @apply font-medium text-sm sm:text-base;
 }
 
-.action {
-  @apply text-emerald-600 font-medium;
+.action-name {
+  @apply text-emerald-600 font-medium text-sm;
 }
 
-.time {
-  @apply text-sm text-gray-500;
+.time-name {
+  @apply text-xs sm:text-sm text-gray-500;
 }
 
-/* ================= SHIFTS ================= */
-
-select,
-input[type="time"],
-input[type="number"] {
-  @apply input mb-3;
+/* Mobile audit row labels */
+.audit-row span::before {
+  @apply sm:hidden text-xs text-gray-400 font-normal block;
 }
 
-/* ================= REQUESTS ================= */
+.audit-row .admin-name::before {
+  content: 'Admin: ';
+}
+
+.audit-row .action-name::before {
+  content: 'Action: ';
+}
+
+.audit-row .time-name:first-of-type::before {
+  content: 'Target: ';
+}
+
+.audit-row .time-name:last-of-type::before {
+  content: 'Time: ';
+}
+
+/* ================= BUTTONS ================= */
+
+.btn-sm {
+  @apply px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs;
+}
 
 .btn-success {
   @apply bg-emerald-600 hover:bg-emerald-700
-         text-white px-4 py-2 rounded-lg
-         text-sm font-medium transition;
+         text-white px-3 sm:px-4 py-2 rounded-lg
+         text-xs sm:text-sm font-medium transition;
+}
+
+/* ================= LOCATION BUTTONS ================= */
+
+.location-buttons {
+  @apply flex flex-col sm:flex-row flex-wrap justify-center gap-2 sm:gap-3 mt-4;
+}
+
+.location-buttons button {
+  @apply flex items-center justify-center gap-2 w-full sm:w-auto;
+}
+
+.location-buttons button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* ================= MAP PICKER MODAL ================= */
+
+.map-picker-overlay {
+  @apply fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4;
+  backdrop-filter: blur(4px);
+}
+
+.map-picker-modal {
+  @apply bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-3xl overflow-hidden;
+  max-height: 95vh;
+}
+
+.map-picker-header {
+  @apply flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200;
+}
+
+.map-picker-header h3 {
+  @apply text-base sm:text-lg font-semibold text-gray-900;
+}
+
+.close-btn {
+  @apply w-8 h-8 flex items-center justify-center text-2xl
+         text-gray-400 hover:text-gray-600 hover:bg-gray-100
+         rounded-lg transition;
+}
+
+.map-picker-info {
+  @apply px-4 sm:px-6 py-2 sm:py-3 bg-gray-50 border-b border-gray-200 text-xs sm:text-sm text-gray-600
+         flex flex-col sm:flex-row sm:items-center justify-between gap-2;
+}
+
+.map-picker-coords {
+  @apply flex items-center gap-2;
+}
+
+.my-location-btn {
+  @apply px-3 py-1.5 bg-white border border-gray-300 rounded-lg
+         text-xs sm:text-sm font-medium hover:bg-gray-100 transition
+         flex items-center gap-1.5
+         disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* ================= RADIUS CONTROL ================= */
+
+.map-picker-radius-control {
+  @apply px-4 sm:px-6 py-3 sm:py-4 bg-white border-b border-gray-200;
+}
+
+.map-picker-radius-control label {
+  @apply text-xs sm:text-sm text-gray-600 block mb-2;
+}
+
+.map-picker-radius-control label strong {
+  @apply text-gray-900;
+}
+
+.radius-slider {
+  @apply w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer;
+  accent-color: #10b981;
+}
+
+.radius-slider::-webkit-slider-thumb {
+  @apply w-5 h-5 rounded-full bg-emerald-500 cursor-pointer appearance-none;
+}
+
+.radius-slider::-moz-range-thumb {
+  @apply w-5 h-5 rounded-full bg-emerald-500 cursor-pointer border-0;
+}
+
+.radius-presets {
+  @apply flex flex-wrap gap-2 mt-3;
+}
+
+.radius-presets button {
+  @apply px-3 py-1 text-xs font-medium rounded-full
+         border border-gray-300 bg-white text-gray-600
+         hover:bg-gray-100 transition;
+}
+
+.radius-presets button.active {
+  @apply bg-emerald-500 text-white border-emerald-500;
+}
+
+.map-picker-map {
+  @apply w-full;
+  height: 280px;
+}
+
+@media (min-width: 640px) {
+  .map-picker-map {
+    height: 400px;
+  }
+}
+
+.map-picker-actions {
+  @apply flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 bg-gray-50;
+}
+
+.map-picker-actions button {
+  @apply w-full sm:w-auto;
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../services/api.service';
@@ -10,10 +10,11 @@ import { ApiService } from '../services/api.service';
   templateUrl: './scan.component.html',
   styleUrls: ['./scan.component.css']
 })
-export class ScanComponent implements OnInit {
+export class ScanComponent implements OnInit, OnDestroy {
 
   status: 'loading' | 'success' | 'error' = 'loading';
   message = '';
+  private redirectTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -33,6 +34,12 @@ export class ScanComponent implements OnInit {
     this.validateQr(token);
   }
 
+  ngOnDestroy(): void {
+    if (this.redirectTimeoutId) {
+      clearTimeout(this.redirectTimeoutId);
+    }
+  }
+
   validateQr(token: string) {
     this.api.validateQr(token).subscribe({
       next: (res: any) => {
@@ -45,9 +52,9 @@ export class ScanComponent implements OnInit {
         this.message = `QR verified: ${res.locationName}`;
 
         // Redirect after short delay
-        setTimeout(() => {
+        this.redirectTimeoutId = setTimeout(() => {
           this.router.navigate(['/attendance']);
-        }, 1500);
+        }, 2200);
       },
       error: () => {
         localStorage.removeItem('locationId');

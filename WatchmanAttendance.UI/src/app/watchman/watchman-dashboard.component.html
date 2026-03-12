@@ -7,26 +7,61 @@
       <p class="wm-subtitle">Your attendance dashboard</p>
     </div>
 
-    <button class="btn btn-danger" (click)="logout()">Logout</button>
+    <button class="btn btn-danger" (click)="logout()">
+      <app-icon name="logout" [size]="16"></app-icon>
+      <span>Logout</span>
+    </button>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="empty">
+    <app-icon name="spinner" [size]="24"></app-icon>
+    <span>Loading dashboard...</span>
+  </div>
+
+  <div *ngIf="!loading && error" class="empty">
+    <span>{{ error }}</span>
   </div>
 
   <!-- TABS -->
-  <div class="wm-tabs">
+  <div class="wm-tabs" *ngIf="!loading">
     <button class="wm-tab"
             [class.active]="activeTab === 'overview'"
             (click)="switchTab('overview')">
-      Overview
+      <app-icon name="chart" [size]="16"></app-icon>
+      <span>Overview</span>
     </button>
 
     <button class="wm-tab"
             [class.active]="activeTab === 'requests'"
             (click)="switchTab('requests')">
-      Attendance Requests
+      <app-icon name="clipboard" [size]="16"></app-icon>
+      <span>Attendance Requests</span>
     </button>
   </div>
 
   <!-- ================= OVERVIEW ================= -->
-  <ng-container *ngIf="activeTab === 'overview'">
+  <ng-container *ngIf="activeTab === 'overview' && !loading">
+
+    <!-- SUMMARY CARDS -->
+    <div class="summary-grid">
+      <div class="summary-card">
+        <p class="summary-label">Month</p>
+        <p class="summary-value">{{ summary.month || '-' }}</p>
+      </div>
+      <div class="summary-card">
+        <p class="summary-label">Present Days</p>
+        <p class="summary-value">{{ summary.presentDays }}</p>
+      </div>
+      <div class="summary-card">
+        <p class="summary-label">Attendance %</p>
+        <p class="summary-value">{{ summary.percentage }}%</p>
+      </div>
+      <div class="summary-card">
+        <p class="summary-label">Last Punch</p>
+        <p class="summary-value">{{ summary.lastPunch ? (summary.lastPunch | date:'shortTime') : 'N/A' }}</p>
+      </div>
+    </div>
 
     <div class="card">
       <div class="card-header">
@@ -89,7 +124,7 @@
   </ng-container>
 
   <!-- ================= REQUESTS ================= -->
-  <ng-container *ngIf="activeTab === 'requests'">
+  <ng-container *ngIf="activeTab === 'requests' && !loading">
 
     <div class="card">
       <h2>Submit Attendance Request</h2>
@@ -103,12 +138,12 @@
         <p><strong>Type:</strong> {{ selectedAttendance.status }}</p>
 
         <textarea rows="4"
-                  placeholder="Enter reason"
+                  placeholder="Enter reason for your request..."
                   [(ngModel)]="requestReason">
         </textarea>
 
         <button class="btn btn-primary"
-                [disabled]="!requestReason"
+                [disabled]="!requestReason.trim()"
                 (click)="submitRequest()">
           Submit Request
         </button>
@@ -118,17 +153,20 @@
     <div class="card">
       <h2>My Requests</h2>
 
-      <div *ngIf="requests.length === 0" class="empty">
+      <div *ngIf="loadingRequests" class="empty">Loading requests...</div>
+
+      <div *ngIf="!loadingRequests && requests.length === 0" class="empty">
         No requests submitted yet.
       </div>
 
-      <div class="table-wrapper" *ngIf="requests.length > 0">
+      <div class="table-wrapper" *ngIf="!loadingRequests && requests.length > 0">
         <table class="table">
           <thead>
             <tr>
               <th>Date</th>
               <th>Type</th>
               <th>Status</th>
+              <th>Created</th>
             </tr>
           </thead>
 
@@ -146,6 +184,7 @@
                   {{ r.status }}
                 </span>
               </td>
+              <td>{{ r.createdAt | date:'medium' }}</td>
             </tr>
           </tbody>
         </table>
@@ -155,138 +194,3 @@
   </ng-container>
 
 </div>
-
-
-<!--<div class="dashboard">-->
-<!-- HEADER -->
-<!--<div class="header">
-  <div>
-    <h1>Welcome, {{ watchmanName }}</h1>
-    <p class="muted">Your attendance dashboard</p>
-  </div>
-  <button class="btn-danger" (click)="logout()">Logout</button>
-</div>-->
-<!-- TABS -->
-<!--<div class="tabs">
-  <button [class.active]="activeTab === 'overview'"
-          (click)="switchTab('overview')">
-    Overview
-  </button>
-
-  <button [class.active]="activeTab === 'requests'"
-          (click)="switchTab('requests')">
-    Attendance Requests
-  </button>
-</div>-->
-<!-- ================= OVERVIEW ================= -->
-<!--<ng-container *ngIf="activeTab === 'overview'">
-
-  <section class="card">
-    <h2>Monthly Attendance</h2>
-
-    <div *ngIf="attendance.length === 0" class="empty">
-      No attendance records
-    </div>
-
-    <div class="table" *ngIf="attendance.length > 0">
-      <div class="table-header">
-        <span>Date</span>
-        <span>Punch</span>
-        <span>Status</span>
-        <span>Location</span>
-        <span>Action</span>
-      </div>
-
-      <div class="table-row" *ngFor="let a of attendance">
-        <span>{{ a.date | date }}</span>
-        <span>{{ a.punchTime | date:'shortTime' }}</span>
-
-        <span class="badge"
-              [ngClass]="{
-                present: a.status === 'Present',
-                late: a.status === 'Late',
-                halfday: a.status === 'HalfDay'
-              }">
-          {{ a.status }}
-        </span>
-
-        <span class="badge ok" *ngIf="a.locationVerified">Verified</span>
-        <span class="badge fail" *ngIf="!a.locationVerified">Failed</span>
-
-        <button *ngIf="a.status !== 'Present'"
-                class="btn-link"
-                (click)="startRequest(a)">
-          Request Change
-        </button>
-
-      </div>
-      <button class="btn-warning" (click)="openLateRequest()">
-        Request Late Arrival
-      </button>
-    </div>
-  </section>
-
-</ng-container>-->
-<!-- ================= REQUESTS ================= -->
-<!--<ng-container *ngIf="activeTab === 'requests'">
-
-    <section class="card">
-      <h2>Submit Request</h2>
-
-      <div *ngIf="!selectedAttendance" class="empty">
-        Select an attendance record from Overview
-      </div>
-
-      <div *ngIf="selectedAttendance">
-        <p><strong>Date:</strong> {{ selectedAttendance.date | date }}</p>
-        <p><strong>Type:</strong> {{ selectedAttendance.status }}</p>
-
-        <textarea rows="4"
-                  placeholder="Enter reason"
-                  [(ngModel)]="requestReason">
-        </textarea>
-
-        <button class="btn-primary"
-                [disabled]="!requestReason"
-                (click)="submitRequest()">
-          Submit Request
-        </button>
-
-
-      </div>
-    </section>
-
-    <section class="card">
-      <h3>My Requests</h3>
-
-      <div *ngIf="requests.length === 0" class="empty">
-        No requests yet
-      </div>
-
-      <table *ngIf="requests.length > 0" class="table">
-        <tr>
-          <th>Date</th>
-          <th>Type</th>
-          <th>Status</th>
-        </tr>
-
-        <tr *ngFor="let r of requests">
-          <td>{{ r.attendanceDate | date }}</td>
-          <td>{{ r.type }}</td>
-          <td>
-            <span class="badge"
-                  [ngClass]="{
-                    pending: r.status === 'Pending',
-                    approved: r.status === 'Approved',
-                    rejected: r.status === 'Rejected'
-                  }">
-              {{ r.status }}
-            </span>
-          </td>
-        </tr>
-      </table>
-    </section>
-
-  </ng-container>
-
-</div>-->
