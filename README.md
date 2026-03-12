@@ -29,6 +29,21 @@
 
 ---
 
+## Google Maps API Key Setup
+
+This project uses the Google Maps JavaScript API.  
+You must provide your own API key.
+
+1. Go to Google Cloud Console
+2. Create a Google Maps JavaScript API key
+3. Replace the API key in the following file:   WatchmanAttendance.UI/src/index.html
+
+line:
+```bash
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&loading=async"></script>
+```
+---
+
 ## How It Works
 
 ```
